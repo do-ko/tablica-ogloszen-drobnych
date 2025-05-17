@@ -1,5 +1,6 @@
 package com.webdevlab.tablicabackend.entity.user;
 
+import com.webdevlab.tablicabackend.constants.ValidationConstants;
 import com.webdevlab.tablicabackend.domain.enums.Role;
 import com.webdevlab.tablicabackend.entity.Auditable;
 import jakarta.persistence.*;
@@ -24,10 +25,10 @@ public class User extends Auditable implements UserDetails{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = ValidationConstants.USER_USERNAME_MAX_LENGTH)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = ValidationConstants.USER_PASSWORD_MAX_LENGTH)
     private String password;
 
     @Embedded
