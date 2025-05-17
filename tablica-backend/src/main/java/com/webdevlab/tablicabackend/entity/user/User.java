@@ -1,6 +1,7 @@
 package com.webdevlab.tablicabackend.entity.user;
 
 import com.webdevlab.tablicabackend.domain.enums.Role;
+import com.webdevlab.tablicabackend.entity.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,13 +19,15 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements UserDetails {
+public class User extends Auditable implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
     @Embedded
@@ -36,7 +39,7 @@ public class User implements UserDetails {
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id")
     )
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Set<Role> roles = new HashSet<>();
 
     @Override
