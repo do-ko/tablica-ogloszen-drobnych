@@ -4,9 +4,11 @@ import com.webdevlab.tablicabackend.domain.LoginResult;
 import com.webdevlab.tablicabackend.domain.RoleAddResult;
 import com.webdevlab.tablicabackend.dto.UserDTO;
 import com.webdevlab.tablicabackend.domain.enums.Role;
+import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.exception.user.UserAlreadyExistsException;
 import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
+import com.webdevlab.tablicabackend.exception.user.UserPasswordException;
 import com.webdevlab.tablicabackend.exception.user.UserRoleException;
 import com.webdevlab.tablicabackend.dto.request.LoginRequest;
 import com.webdevlab.tablicabackend.dto.request.RegisterRequest;
@@ -52,10 +54,21 @@ public class UserService {
         return new LoginResult(token, new UserDTO(user));
     }
 
-    public RoleAddResult addRole(String userId, Role role){
+    public void changePassword(String userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (user.getRoles().contains(role)){
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new UserPasswordException("Old password does not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public RoleAddResult addRole(String userId, Role role) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.getRoles().contains(role)) {
             throw new UserRoleException("User already has this role");
         }
 

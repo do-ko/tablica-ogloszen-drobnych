@@ -2,6 +2,7 @@ package com.webdevlab.tablicabackend.controller;
 
 import com.webdevlab.tablicabackend.domain.LoginResult;
 import com.webdevlab.tablicabackend.dto.UserDTO;
+import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
 import com.webdevlab.tablicabackend.dto.response.RegisterResponse;
 import com.webdevlab.tablicabackend.dto.request.LoginRequest;
 import com.webdevlab.tablicabackend.dto.response.LoginResponse;
@@ -45,5 +46,4 @@ public class AuthenticationController {
                 .build();
         return ResponseEntity.ok(response);
     }
-
 }

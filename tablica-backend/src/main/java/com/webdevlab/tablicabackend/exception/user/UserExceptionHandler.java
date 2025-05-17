@@ -23,4 +23,9 @@ public class UserExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUserRoleException(UserRoleException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
+
+    @ExceptionHandler(UserPasswordException.class)
+    public ResponseEntity<Map<String, String>> handleUserPasswordException(UserPasswordException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
+    }
 }
