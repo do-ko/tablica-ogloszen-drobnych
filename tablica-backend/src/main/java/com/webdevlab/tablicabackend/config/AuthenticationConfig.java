@@ -1,6 +1,6 @@
 package com.webdevlab.tablicabackend.config;
 
-import com.webdevlab.tablicabackend.exception.UserNotFoundException;
+import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
 import com.webdevlab.tablicabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

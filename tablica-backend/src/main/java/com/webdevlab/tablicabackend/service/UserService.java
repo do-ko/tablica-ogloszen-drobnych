@@ -1,10 +1,15 @@
 package com.webdevlab.tablicabackend.service;
 
-import com.webdevlab.tablicabackend.entity.User;
-import com.webdevlab.tablicabackend.exception.UserAlreadyExistsException;
-import com.webdevlab.tablicabackend.exception.UserNotFoundException;
-import com.webdevlab.tablicabackend.payload.LoginRequest;
-import com.webdevlab.tablicabackend.payload.RegisterRequest;
+import com.webdevlab.tablicabackend.domain.LoginResult;
+import com.webdevlab.tablicabackend.domain.RoleAddResult;
+import com.webdevlab.tablicabackend.dto.UserDTO;
+import com.webdevlab.tablicabackend.domain.enums.Role;
+import com.webdevlab.tablicabackend.entity.user.User;
+import com.webdevlab.tablicabackend.exception.user.UserAlreadyExistsException;
+import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
+import com.webdevlab.tablicabackend.exception.user.UserRoleException;
+import com.webdevlab.tablicabackend.dto.request.LoginRequest;
+import com.webdevlab.tablicabackend.dto.request.RegisterRequest;
 import com.webdevlab.tablicabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,8 +25,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-    public User register(RegisterRequest request) {
+    public UserDTO register(RegisterRequest request) {
         userRepository.findByUsername(request.getUsername()).ifPresent(user -> {
             throw new UserAlreadyExistsException("User with this username already exists");
         });
@@ -30,17 +36,35 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles(request.getRoles())
                 .build();
-        return userRepository.save(user);
+        return new UserDTO(userRepository.save(user));
     }
 
-    public User login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getUsername(),
                 request.getPassword()
         ));
-        return user;
+
+        String token = jwtService.generateToken(user);
+
+        return new LoginResult(token, new UserDTO(user));
+    }
+
+    public RoleAddResult addRole(String userId, Role role){
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.getRoles().contains(role)){
+            throw new UserRoleException("User already has this role");
+        }
+
+        user.getRoles().add(role);
+        userRepository.save(user);
+
+        String token = jwtService.generateToken(user);
+
+        return new RoleAddResult(token, new UserDTO(user));
     }
 
 }

@@ -1,6 +1,6 @@
-package com.webdevlab.tablicabackend.payload;
+package com.webdevlab.tablicabackend.dto.request;
 
-import com.webdevlab.tablicabackend.entity.Role;
+import com.webdevlab.tablicabackend.domain.enums.Role;
 import lombok.Builder;
 import lombok.Data;
 

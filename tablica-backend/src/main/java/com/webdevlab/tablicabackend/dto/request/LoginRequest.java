@@ -1,4 +1,4 @@
-package com.webdevlab.tablicabackend.payload;
+package com.webdevlab.tablicabackend.dto.request;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package com.webdevlab.tablicabackend.repository;
 
-import com.webdevlab.tablicabackend.entity.User;
+import com.webdevlab.tablicabackend.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

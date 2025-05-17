@@ -1,5 +1,6 @@
-package com.webdevlab.tablicabackend.entity;
+package com.webdevlab.tablicabackend.entity.user;
 
+import com.webdevlab.tablicabackend.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +26,9 @@ public class User implements UserDetails {
     private String username;
 
     private String password;
+
+    @Embedded
+    private ContactData contactData;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)

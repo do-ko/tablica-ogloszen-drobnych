@@ -1,14 +1,16 @@
 package com.webdevlab.tablicabackend.controller;
 
-import com.webdevlab.tablicabackend.entity.User;
-import com.webdevlab.tablicabackend.payload.LoginRequest;
-import com.webdevlab.tablicabackend.payload.LoginResponse;
-import com.webdevlab.tablicabackend.payload.RegisterRequest;
+import com.webdevlab.tablicabackend.domain.LoginResult;
+import com.webdevlab.tablicabackend.dto.UserDTO;
+import com.webdevlab.tablicabackend.dto.response.RegisterResponse;
+import com.webdevlab.tablicabackend.entity.user.User;
+import com.webdevlab.tablicabackend.dto.request.LoginRequest;
+import com.webdevlab.tablicabackend.dto.response.LoginResponse;
+import com.webdevlab.tablicabackend.dto.request.RegisterRequest;
 import com.webdevlab.tablicabackend.service.JwtService;
 import com.webdevlab.tablicabackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,22 +19,24 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final UserService userService;
-    private final JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody final RegisterRequest registerRequest) {
-        User user = userService.register(registerRequest);
-        return ResponseEntity.ok(user);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody final LoginRequest authenticationRequest) {
-        User user = userService.login(authenticationRequest);
-        String token = jwtService.generateToken(user);
-        LoginResponse response = LoginResponse.builder()
-                .token(token)
+    public ResponseEntity<RegisterResponse> register(@RequestBody final RegisterRequest registerRequest) {
+        UserDTO user = userService.register(registerRequest);
+        RegisterResponse response = RegisterResponse.builder()
                 .user(user)
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody final LoginRequest authenticationRequest) {
+        LoginResult loginResult = userService.login(authenticationRequest);
+        LoginResponse response = LoginResponse.builder()
+                .token(loginResult.token())
+                .user(loginResult.user())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 }
