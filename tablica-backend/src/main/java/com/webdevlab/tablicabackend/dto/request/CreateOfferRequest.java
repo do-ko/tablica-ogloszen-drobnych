@@ -15,10 +15,6 @@ import java.util.Set;
 @Builder
 @Data
 public class CreateOfferRequest {
-    @Schema(description = "The id of the user creating the offer.", example = "37fcfb5c-49e2-4326-99c4-90a34a91da8e")
-    @NotBlank(message = "User id must not be empty or contain only whitespaces")
-    private String sellerId;
-
     @Schema(description = "The title of the offer. Should be concise and descriptive.", example = "Used Bicycle for Sale")
     @NotBlank(message = "Title must not be empty or contain only whitespaces")
     @Size(max = ValidationConstants.OFFER_TITLE_MAX_LENGTH,

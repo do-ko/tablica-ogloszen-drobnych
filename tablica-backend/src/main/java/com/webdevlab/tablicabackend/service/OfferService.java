@@ -7,10 +7,12 @@ import com.webdevlab.tablicabackend.entity.offer.Offer;
 import com.webdevlab.tablicabackend.entity.offer.OfferTag;
 import com.webdevlab.tablicabackend.entity.user.ContactData;
 import com.webdevlab.tablicabackend.entity.user.User;
+import com.webdevlab.tablicabackend.exception.offer.InvalidOfferStatusTransitionException;
+import com.webdevlab.tablicabackend.exception.offer.OfferNotFoundException;
+import com.webdevlab.tablicabackend.exception.offer.UnauthorizedOfferAccessException;
 import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.OfferTagRepository;
-import com.webdevlab.tablicabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,15 +27,12 @@ import java.util.stream.Collectors;
 public class OfferService {
     private final OfferRepository offerRepository;
     private final OfferTagRepository offerTagRepository;
-    private final UserRepository userRepository;
 
     public Page<String> getAllTags(Pageable pageable) {
         return offerTagRepository.findAll(pageable).map(OfferTag::getTag);
     }
 
-    public OfferDTO createOffer(CreateOfferRequest request) {
-        User seller = userRepository.findById(request.getSellerId()).orElseThrow(() -> new UserNotFoundException("User not found"));
-
+    public OfferDTO createOffer(User seller, CreateOfferRequest request) {
         Set<OfferTag> tags = request.getTags().stream()
                 .filter(tag -> tag != null && !tag.isBlank())
                 .map(tag -> {
@@ -60,6 +59,21 @@ public class OfferService {
 
     public Page<OfferDTO> getAllPublishedOffers(String keyword, Pageable pageable) {
         return offerRepository.searchOffersIncludingTags(OfferStatus.PUBLISHED, keyword, pageable).map(OfferDTO::new);
+    }
+
+    public OfferDTO changeOrderStatus(String offerId, User user, OfferStatus status) {
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException("Offer not found"));
+        if (!offer.getSeller().getId().equals(user.getId()))
+            throw new UnauthorizedOfferAccessException("Only the author of this offer is allowed to change its status");
+
+        if (status.equals(OfferStatus.WORK_IN_PROGRESS))
+            throw new InvalidOfferStatusTransitionException("Changing status to WORK_IN_PROGRESS is not allowed. This status is only valid when initially creating an offer");
+
+        if (status.equals(OfferStatus.PUBLISHED) && offer.getStatus().equals(OfferStatus.ARCHIVE))
+            throw new InvalidOfferStatusTransitionException("Changing status of ARCHIVED offers is not allowed");
+
+        offer.setStatus(status);
+        return new OfferDTO(offerRepository.save(offer));
     }
 
     private String capitalize(String tag) {

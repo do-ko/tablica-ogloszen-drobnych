@@ -1,8 +1,10 @@
 package com.webdevlab.tablicabackend.controller;
 
+import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.dto.response.CreateOfferResponse;
+import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.service.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,7 +34,7 @@ public class OfferController {
         return ResponseEntity.ok(offerService.getAllTags(pageable));
     }
 
-    @PreAuthorize("hasRole('SELLER') and @security.isSelf(#createOfferRequest.sellerId, authentication) and @security.isEnabled(authentication)")
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
     @Operation(summary = "Create a new offer",
             description = "Allows an authenticated user with the SELLER role to create a new offer. " +
                     "The offer must include a title, description, and status (preferably WORK_IN_PROGRESS or PUBLISHED). " +
@@ -40,8 +43,9 @@ public class OfferController {
                     "Contact information for the offer can either be pulled from the user's saved profile or provided directly in the request. " +
                     "If the 'discloseSavedContactInformation' flag is set to true, any custom email or phone provided will be ignored.")
     @PostMapping()
-    public ResponseEntity<CreateOfferResponse> createNewOffer(@Valid @RequestBody CreateOfferRequest createOfferRequest) {
-        OfferDTO offerDTO = offerService.createOffer(createOfferRequest);
+    public ResponseEntity<CreateOfferResponse> createNewOffer(@Valid @RequestBody CreateOfferRequest request,
+                                                              @AuthenticationPrincipal User user) {
+        OfferDTO offerDTO = offerService.createOffer(user, request);
         CreateOfferResponse response = CreateOfferResponse.builder()
                 .offer(offerDTO)
                 .build();
@@ -57,5 +61,19 @@ public class OfferController {
     public ResponseEntity<Page<OfferDTO>> getAllPublishedOffers(@RequestParam(defaultValue = "") String keyword, Pageable pageable) {
         Page<OfferDTO> offers = offerService.getAllPublishedOffers(keyword, pageable);
         return ResponseEntity.ok(offers);
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Change the status of an offer",
+            description = "Allows an authenticated user with the SELLER role to change the status of one of their own offers. " +
+                    "The user must be the owner of the offer and have an active (enabled) account. " +
+                    "The new status is provided in the request body. " +
+                    "Returns the updated offer details upon success.")
+    @PutMapping("/{offerId}/status")
+    public ResponseEntity<OfferDTO> changeOfferStatus(@PathVariable String offerId,
+                                                      @RequestParam OfferStatus status,
+                                                      @AuthenticationPrincipal User user) {
+        OfferDTO offer = offerService.changeOrderStatus(offerId, user, status);
+        return ResponseEntity.ok(offer);
     }
 }
