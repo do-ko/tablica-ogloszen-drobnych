@@ -28,4 +28,9 @@ public class UserExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUserPasswordException(UserPasswordException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
+
+    @ExceptionHandler(UnauthorizedUserAccessException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedUserAccessException(UnauthorizedUserAccessException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
+    }
 }

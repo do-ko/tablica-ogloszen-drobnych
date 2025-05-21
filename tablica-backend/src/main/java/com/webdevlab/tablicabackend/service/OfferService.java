@@ -1,6 +1,7 @@
 package com.webdevlab.tablicabackend.service;
 
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
+import com.webdevlab.tablicabackend.domain.enums.Role;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
@@ -13,17 +14,18 @@ import com.webdevlab.tablicabackend.exception.offer.InvalidOfferStatusTransition
 import com.webdevlab.tablicabackend.exception.offer.OfferModificationNotAllowedException;
 import com.webdevlab.tablicabackend.exception.offer.OfferNotFoundException;
 import com.webdevlab.tablicabackend.exception.offer.UnauthorizedOfferAccessException;
+import com.webdevlab.tablicabackend.exception.user.UnauthorizedUserAccessException;
+import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.OfferTagRepository;
+import com.webdevlab.tablicabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 public class OfferService {
     private final OfferRepository offerRepository;
     private final OfferTagRepository offerTagRepository;
+    private final UserRepository userRepository;
 
     public Page<TagUsageDTO> getAllTags(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -59,7 +62,7 @@ public class OfferService {
     }
 
     public Page<OfferDTO> getAllPublishedOffers(String keyword, Pageable pageable) {
-        return offerRepository.searchOffersIncludingTags(OfferStatus.PUBLISHED, keyword, pageable).map(OfferDTO::new);
+        return offerRepository.searchOffers(OfferStatus.PUBLISHED, null, keyword, pageable).map(OfferDTO::new);
     }
 
     public OfferDTO changeOrderStatus(String offerId, User user, OfferStatus status) {
@@ -101,6 +104,17 @@ public class OfferService {
         offer.setContactData(new ContactData(request.getEmail(), request.getPhone()));
 
         return new OfferDTO(offerRepository.save(offer));
+    }
+
+    public Page<OfferDTO> getUsersOffers(String userId, User loggedUser, String keyword, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        boolean isSelf = loggedUser.getId().equals(user.getId());
+
+        if (!isSelf && !loggedUser.getRoles().contains(Role.BUYER))
+            throw new UnauthorizedUserAccessException("Only users with the BUYER role are allowed to view other users' offers");
+
+        OfferStatus status = isSelf ? null : OfferStatus.PUBLISHED;
+        return offerRepository.searchOffers(status, user, keyword, pageable).map(OfferDTO::new);
     }
 
     private String capitalize(String tag) {

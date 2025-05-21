@@ -55,11 +55,12 @@ public class OfferController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@security.isEnabled(authentication)")
+    @PreAuthorize("hasRole('BUYER') and @security.isEnabled(authentication)")
     @Operation(summary = "Get all published offers",
             description = "Retrieves a paginated list of all published offers that match the given keyword. " +
                     "The keyword is searched case-insensitively in the offer title, description, and associated tags. " +
                     "Supports pagination and sorting using standard Pageable parameters such as page, size, and sort. " +
+                    "This is available only for users with a BUYER role. " +
                     "Returns a page of offer data with metadata like total pages and current page index.")
     @GetMapping()
     public ResponseEntity<Page<OfferDTO>> getAllPublishedOffers(@RequestParam(defaultValue = "") String keyword, Pageable pageable) {
@@ -110,4 +111,19 @@ public class OfferController {
         return ResponseEntity.ok(offerDTO);
     }
 
+    @PreAuthorize("@security.isEnabled(authentication)")
+    @Operation(summary = "Get offers by user ID",
+            description = "Retrieves a paginated list of offers created by the specified user. " +
+                    "If the authenticated user is requesting their own offers, all of their offers will be returned regardless of status. " +
+                    "If the authenticated user is requesting offers of another user, only offers with the PUBLISHED status will be returned. " +
+                    "Access to other users' offers is restricted to users with the BUYER role. " +
+                    "Supports keyword-based search through offer titles, descriptions, and tags, as well as pagination parameters.")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<OfferDTO>> getOffersByUserId(@PathVariable String userId,
+                                                            @RequestParam(defaultValue = "") String keyword,
+                                                            Pageable pageable,
+                                                            @AuthenticationPrincipal User user) {
+        Page<OfferDTO> offers = offerService.getUsersOffers(userId, user, keyword, pageable);
+        return ResponseEntity.ok(offers);
+    }
 }
