@@ -15,7 +15,7 @@ import java.util.Set;
 public class CreateOfferRequest {
     @Schema(description = "The id of the user creating the offer.", example = "37fcfb5c-49e2-4326-99c4-90a34a91da8e")
     @NotBlank(message = "User id must not be empty or contain only whitespaces")
-    private String userId;
+    private String sellerId;
 
     @Schema(description = "The title of the offer. Should be concise and descriptive.", example = "Used Bicycle for Sale")
     @NotBlank(message = "Title must not be empty or contain only whitespaces")
@@ -34,7 +34,11 @@ public class CreateOfferRequest {
     private OfferStatus status;
 
     @Schema(description = "A set of tag names to categorize the offer. Each tag should match an existing tag in the system. " +
-                    "Tags help users filter and discover relevant offers.",
+            "Tags help users filter and discover relevant offers.",
             example = "[\"Electronics\", \"Gaming\"]")
     private Set<String> tags;
+
+    @Schema(description = "Indicates whether the seller's contact information should be disclosed to viewers of the offer.",
+            example = "false")
+    private boolean discloseContactInformation;
 }

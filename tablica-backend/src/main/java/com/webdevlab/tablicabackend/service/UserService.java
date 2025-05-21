@@ -2,9 +2,13 @@ package com.webdevlab.tablicabackend.service;
 
 import com.webdevlab.tablicabackend.domain.LoginResult;
 import com.webdevlab.tablicabackend.domain.RoleAddResult;
+import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.UserDTO;
 import com.webdevlab.tablicabackend.domain.enums.Role;
+import com.webdevlab.tablicabackend.dto.request.ChangeContactDataRequest;
 import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
+import com.webdevlab.tablicabackend.entity.offer.Offer;
+import com.webdevlab.tablicabackend.entity.user.ContactData;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.exception.user.UserAlreadyExistsException;
 import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
@@ -12,12 +16,15 @@ import com.webdevlab.tablicabackend.exception.user.UserPasswordException;
 import com.webdevlab.tablicabackend.exception.user.UserRoleException;
 import com.webdevlab.tablicabackend.dto.request.LoginRequest;
 import com.webdevlab.tablicabackend.dto.request.RegisterRequest;
+import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 
 @Service
@@ -28,6 +35,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final OfferRepository offerRepository;
 
     public UserDTO register(RegisterRequest request) {
         userRepository.findByUsername(request.getUsername()).ifPresent(user -> {
@@ -82,9 +90,19 @@ public class UserService {
     }
 
     // TODO - write tests (do later as more classes will be affected by this method soon)
-    public void deactivateAccount(String userId){
+    public void deactivateAccount(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
         user.setEnabled(false);
+        Set<Offer> offers = user.getOffers();
+        offers.forEach(offer -> offer.setStatus(OfferStatus.ARCHIVE));
         userRepository.save(user);
+        offerRepository.saveAll(offers);
+    }
+
+    public UserDTO changeContactData(String userId, ChangeContactDataRequest request){
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        ContactData contactData = new ContactData(request);
+        user.setContactData(contactData);
+        return new UserDTO(userRepository.save(user));
     }
 }

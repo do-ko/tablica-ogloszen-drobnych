@@ -2,7 +2,10 @@ package com.webdevlab.tablicabackend.controller;
 
 import com.webdevlab.tablicabackend.domain.RoleAddResult;
 import com.webdevlab.tablicabackend.domain.enums.Role;
+import com.webdevlab.tablicabackend.dto.UserDTO;
+import com.webdevlab.tablicabackend.dto.request.ChangeContactDataRequest;
 import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
+import com.webdevlab.tablicabackend.dto.response.ChangeContactDataResponse;
 import com.webdevlab.tablicabackend.dto.response.ChangePasswordResponse;
 import com.webdevlab.tablicabackend.dto.response.DeactivateAccountResponse;
 import com.webdevlab.tablicabackend.dto.response.RoleAddResponse;
@@ -13,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -65,6 +69,17 @@ public class UserController {
         userService.deactivateAccount(userId);
         DeactivateAccountResponse response = DeactivateAccountResponse.builder()
                 .message("Account deactivated successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
+    @PutMapping("/{userId}/contactData")
+    public ResponseEntity<ChangeContactDataResponse> changeContactData(@PathVariable String userId,
+                                                                       @Valid @RequestBody ChangeContactDataRequest request) {
+        UserDTO userDTO = userService.changeContactData(userId, request);
+        ChangeContactDataResponse response = ChangeContactDataResponse.builder()
+                .user(userDTO)
                 .build();
         return ResponseEntity.ok(response);
     }

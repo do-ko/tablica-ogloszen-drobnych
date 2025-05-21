@@ -1,6 +1,5 @@
 package com.webdevlab.tablicabackend.service;
 
-import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
@@ -31,7 +30,7 @@ public class OfferService {
     }
 
     public OfferDTO createOffer(CreateOfferRequest request) {
-        User seller = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User seller = userRepository.findById(request.getSellerId()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Set<OfferTag> tags = request.getTags().stream()
                 .filter(tag -> tag != null && !tag.isBlank())
@@ -40,15 +39,19 @@ public class OfferService {
                     return offerTagRepository.findById(capitalizedTag).orElseGet(() -> offerTagRepository.save(OfferTag.builder().tag(capitalizedTag).build()));
                 }).collect(Collectors.toSet());
 
-        Offer offer = Offer.builder()
+
+        Offer.OfferBuilder offerBuilder = Offer.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .seller(seller)
                 .status(request.getStatus())
-                .tags(tags)
-                .build();
+                .tags(tags);
 
-        return new OfferDTO(offerRepository.save(offer));
+        if (request.isDiscloseContactInformation()) {
+            offerBuilder.contactData(seller.getContactData());
+        }
+
+        return new OfferDTO(offerRepository.save(offerBuilder.build()));
     }
 
     private String capitalize(String tag) {

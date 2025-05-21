@@ -31,7 +31,7 @@ public class OfferController {
         return ResponseEntity.ok(offerService.getAllTags(pageable));
     }
 
-    @PreAuthorize("hasRole('SELLER') and @security.isSelf(#createOfferRequest.userId, authentication) and @security.isEnabled(authentication)")
+    @PreAuthorize("hasRole('SELLER') and @security.isSelf(#createOfferRequest.sellerId, authentication) and @security.isEnabled(authentication)")
     @Operation(summary = "Create a new offer",
             description = "Allows an authenticated user with the SELLER role to create a new offer. " +
                     "The offer must include a title, description, and status (preferably WORK_IN_PROGRESS or PUBLISHED). " +
