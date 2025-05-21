@@ -2,6 +2,7 @@ package com.webdevlab.tablicabackend.service;
 
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
+import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
 import com.webdevlab.tablicabackend.entity.offer.OfferTag;
@@ -15,6 +16,7 @@ import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.OfferTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +30,9 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final OfferTagRepository offerTagRepository;
 
-    public Page<String> getAllTags(Pageable pageable) {
-        return offerTagRepository.findAll(pageable).map(OfferTag::getTag);
+    public Page<TagUsageDTO> getAllTags(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return offerTagRepository.findAllTagsWithUsage(pageable);
     }
 
     public OfferDTO createOffer(User seller, CreateOfferRequest request) {

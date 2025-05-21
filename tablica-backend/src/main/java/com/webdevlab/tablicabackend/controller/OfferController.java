@@ -2,6 +2,7 @@ package com.webdevlab.tablicabackend.controller;
 
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
+import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.dto.response.CreateOfferResponse;
 import com.webdevlab.tablicabackend.entity.user.User;
@@ -24,14 +25,15 @@ import org.springframework.web.bind.annotation.*;
 public class OfferController {
     private final OfferService offerService;
 
-    @Operation(summary = "Get all tags",
-            description = "Retrieves a paginated list of all offer tags available in the system. " +
-                    "Supports pagination parameters such as page number, page size, and sorting. " +
-                    "Returns a page of tags with metadata like total pages and current page index." +
-                    "HINT: use \"tag,asc\" as a sort parameter")
+    @Operation(summary = "Get all tags sorted by usage",
+            description = "Retrieves a paginated list of all offer tags, sorted by how frequently each tag is used in published offers. " +
+                    "Supports pagination parameters such as page number and page size. " +
+                    "Sorting is always applied automatically by usage count in descending order, and custom sort parameters will be ignored. " +
+                    "Returns a page of tag data including total elements and current page index.")
     @GetMapping("/tag")
-    public ResponseEntity<Page<String>> getAllTags(Pageable pageable) {
-        return ResponseEntity.ok(offerService.getAllTags(pageable));
+    public ResponseEntity<Page<TagUsageDTO>> getAllTags(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(offerService.getAllTags(page, size));
     }
 
     @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
