@@ -4,6 +4,7 @@ import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
+import com.webdevlab.tablicabackend.dto.request.UpdateOfferRequest;
 import com.webdevlab.tablicabackend.dto.response.CreateOfferResponse;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.service.OfferService;
@@ -42,9 +43,8 @@ public class OfferController {
             description = "Allows an authenticated user with the SELLER role to create a new offer. " +
                     "The offer must include a title, description, and status (preferably WORK_IN_PROGRESS or PUBLISHED). " +
                     "The authenticated user must be the one creating the offer and must have an active (enabled) account. " +
-                    "Returns the created offer details upon success. " +
-                    "Contact information for the offer can either be pulled from the user's saved profile or provided directly in the request. " +
-                    "If the 'discloseSavedContactInformation' flag is set to true, any custom email or phone provided will be ignored.")
+                    "Contact information for the offer and tags are optional. " +
+                    "Returns the created offer details upon success. ")
     @PostMapping()
     public ResponseEntity<CreateOfferResponse> createNewOffer(@Valid @RequestBody CreateOfferRequest request,
                                                               @AuthenticationPrincipal User user) {
@@ -93,4 +93,21 @@ public class OfferController {
         OfferDTO offer = offerService.getOrderById(offerId, user);
         return ResponseEntity.ok(offer);
     }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Update an existing offer",
+            description = "Allows an authenticated user with the SELLER role to update an existing offer they own. " +
+                    "Only the author of the offer can perform this operation, and their account must be active (enabled). " +
+                    "The offer must not be archived; archived offers cannot be modified. " +
+                    "Fields such as title, description, status, contact information, and tags can be updated. " +
+                    "Contact information for the offer and tags are optional. " +
+                    "Returns the updated offer details upon success.")
+    @PutMapping("/{offerId}")
+    public ResponseEntity<OfferDTO> updateOffer(@PathVariable String offerId,
+                                                @Valid @RequestBody UpdateOfferRequest request,
+                                                @AuthenticationPrincipal User user) {
+        OfferDTO offerDTO = offerService.updateOrderById(offerId, user, request);
+        return ResponseEntity.ok(offerDTO);
+    }
+
 }

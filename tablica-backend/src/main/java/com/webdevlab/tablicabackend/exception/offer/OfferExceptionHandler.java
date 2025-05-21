@@ -23,4 +23,9 @@ public class OfferExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidOfferStatusTransitionException(InvalidOfferStatusTransitionException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
+
+    @ExceptionHandler(OfferModificationNotAllowedException.class)
+    public ResponseEntity<Map<String, String>> handleOfferModificationNotAllowedException(OfferModificationNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
+    }
 }
