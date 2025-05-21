@@ -11,7 +11,6 @@ import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.exception.offer.InvalidOfferStatusTransitionException;
 import com.webdevlab.tablicabackend.exception.offer.OfferNotFoundException;
 import com.webdevlab.tablicabackend.exception.offer.UnauthorizedOfferAccessException;
-import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.OfferTagRepository;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +76,12 @@ public class OfferService {
 
         offer.setStatus(status);
         return new OfferDTO(offerRepository.save(offer));
+    }
+
+    public OfferDTO getOrderById(String orderId, User user) {
+        Offer offer = offerRepository.findById(orderId).orElseThrow(() -> new OfferNotFoundException("Order not found"));
+        if (!offer.getStatus().equals(OfferStatus.PUBLISHED) && !user.getId().equals(offer.getSeller().getId())) throw new UnauthorizedOfferAccessException("Only the author has access their offer to that is not published");
+        return new OfferDTO(offer);
     }
 
     private String capitalize(String tag) {

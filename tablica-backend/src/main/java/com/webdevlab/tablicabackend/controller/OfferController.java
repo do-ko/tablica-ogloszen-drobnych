@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class OfferController {
     private final OfferService offerService;
 
+    @PreAuthorize("@security.isEnabled(authentication)")
     @Operation(summary = "Get all tags sorted by usage",
             description = "Retrieves a paginated list of all offer tags, sorted by how frequently each tag is used in published offers. " +
                     "Supports pagination parameters such as page number and page size. " +
@@ -54,6 +55,7 @@ public class OfferController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@security.isEnabled(authentication)")
     @Operation(summary = "Get all published offers",
             description = "Retrieves a paginated list of all published offers that match the given keyword. " +
                     "The keyword is searched case-insensitively in the offer title, description, and associated tags. " +
@@ -76,6 +78,19 @@ public class OfferController {
                                                       @RequestParam OfferStatus status,
                                                       @AuthenticationPrincipal User user) {
         OfferDTO offer = offerService.changeOrderStatus(offerId, user, status);
+        return ResponseEntity.ok(offer);
+    }
+
+    @PreAuthorize("@security.isEnabled(authentication)")
+    @Operation(summary = "Get offer by id",
+            description = "Retrieves the details of a specific offer by its id. " +
+                    "If the offer is published, it is publicly accessible. " +
+                    "If the offer is not published, access is restricted to the offer's author. " +
+                    "Returns the offer's full details if access is granted.")
+    @GetMapping("/{offerId}")
+    public ResponseEntity<OfferDTO> getOfferById(@PathVariable String offerId,
+                                                 @AuthenticationPrincipal User user) {
+        OfferDTO offer = offerService.getOrderById(offerId, user);
         return ResponseEntity.ok(offer);
     }
 }
