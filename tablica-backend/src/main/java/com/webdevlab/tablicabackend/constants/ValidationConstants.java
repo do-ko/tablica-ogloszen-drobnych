@@ -13,4 +13,6 @@ public final class ValidationConstants {
     //    OFFER
     public static final int OFFER_TITLE_MAX_LENGTH = 255;
     public static final int OFFER_DESCRIPTION_MAX_LENGTH = 1500;
+
+    public static final int OFFER_TAG_MAX_LENGTH = 64;
 }

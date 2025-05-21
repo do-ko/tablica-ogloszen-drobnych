@@ -87,5 +87,4 @@ public class UserService {
         user.setEnabled(false);
         userRepository.save(user);
     }
-
 }

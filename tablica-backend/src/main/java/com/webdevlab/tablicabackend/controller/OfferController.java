@@ -1,0 +1,48 @@
+package com.webdevlab.tablicabackend.controller;
+
+import com.webdevlab.tablicabackend.dto.OfferDTO;
+import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
+import com.webdevlab.tablicabackend.dto.response.CreateOfferResponse;
+import com.webdevlab.tablicabackend.service.OfferService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/offer")
+@RequiredArgsConstructor
+@Tag(name = "Offer")
+public class OfferController {
+    private final OfferService offerService;
+
+    @Operation(summary = "Get all tags",
+            description = "Retrieves a paginated list of all offer tags available in the system. " +
+                    "Supports pagination parameters such as page number, page size, and sorting. " +
+                    "Returns a page of tags with metadata like total pages and current page index." +
+                    "HINT: use \"tag,asc\" as a sort parameter")
+    @GetMapping("/tag")
+    public ResponseEntity<Page<String>> getAllTags(Pageable pageable) {
+        return ResponseEntity.ok(offerService.getAllTags(pageable));
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isSelf(#createOfferRequest.userId, authentication) and @security.isEnabled(authentication)")
+    @Operation(summary = "Create a new offer",
+            description = "Allows an authenticated user with the SELLER role to create a new offer. " +
+                    "The offer must include a title, description, and status (preferably WORK_IN_PROGRESS or PUBLISHED). " +
+                    "The authenticated user must be the one creating the offer and must have an active (enabled) account. " +
+                    "Returns the created offer details upon success.")
+    @PostMapping()
+    public ResponseEntity<CreateOfferResponse> createNewOffer(@Valid @RequestBody CreateOfferRequest createOfferRequest) {
+        OfferDTO offerDTO = offerService.createOffer(createOfferRequest);
+        CreateOfferResponse response = CreateOfferResponse.builder()
+                .offer(offerDTO)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+}

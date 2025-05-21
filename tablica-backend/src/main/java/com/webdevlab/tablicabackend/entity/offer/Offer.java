@@ -3,6 +3,7 @@ package com.webdevlab.tablicabackend.entity.offer;
 import com.webdevlab.tablicabackend.constants.ValidationConstants;
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.entity.Auditable;
+import com.webdevlab.tablicabackend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +29,9 @@ public class Offer extends Auditable {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OfferStatus status;
+
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
 }

@@ -6,7 +6,6 @@ import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
 import com.webdevlab.tablicabackend.dto.response.ChangePasswordResponse;
 import com.webdevlab.tablicabackend.dto.response.DeactivateAccountResponse;
 import com.webdevlab.tablicabackend.dto.response.RoleAddResponse;
-import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,8 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(#userId, authentication)")
+    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
     @Operation(summary = "Add a role to the user",
             description = "Adds a new role to the specified user by their ID. Only the authenticated user can modify their own roles. " +
                     "Returns an updated JWT token and user details after the role is added. " +
@@ -41,7 +38,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(#userId, authentication)")
+    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
     @Operation(summary = "Change user password",
             description = "Allows an authenticated user to change their own password by providing their current password and a new one. " +
                     "The current password must match the existing one in the system. " +
@@ -57,7 +54,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(#userId, authentication)")
+    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
     @Operation(summary = "Deactivate user account",
             description = "Allows an authenticated user to deactivate their own account. " +
                     "Only the currently authenticated user can deactivate their own account. " +

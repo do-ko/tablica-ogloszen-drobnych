@@ -12,7 +12,7 @@ public class SecurityService {
         return user.getId().equals(targetUserId);
     }
 
-    public boolean isEnabled(String targetUserId, Authentication authentication) {
+    public boolean isEnabled(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return user.isEnabled();
     }

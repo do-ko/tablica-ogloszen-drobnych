@@ -3,6 +3,7 @@ package com.webdevlab.tablicabackend.entity.user;
 import com.webdevlab.tablicabackend.constants.ValidationConstants;
 import com.webdevlab.tablicabackend.domain.enums.Role;
 import com.webdevlab.tablicabackend.entity.Auditable;
+import com.webdevlab.tablicabackend.entity.offer.Offer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
@@ -53,6 +54,9 @@ public class User extends Auditable implements UserDetails{
 
     @Column(nullable = false)
     private boolean isEnabled = true;
+
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Offer> offers;
 
     @Override
     public boolean isAccountNonExpired() {
