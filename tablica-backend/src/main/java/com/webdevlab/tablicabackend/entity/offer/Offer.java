@@ -7,6 +7,9 @@ import com.webdevlab.tablicabackend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "offer")
 @Getter
@@ -30,8 +33,13 @@ public class Offer extends Auditable {
     @Enumerated(EnumType.STRING)
     private OfferStatus status;
 
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "offer_tags",
+            joinColumns = @JoinColumn(name = "offer_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag"))
+    private Set<OfferTag> tags = new HashSet<>();
 }

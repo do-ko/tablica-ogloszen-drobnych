@@ -56,7 +56,7 @@ public class User extends Auditable implements UserDetails{
     private boolean isEnabled = true;
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Offer> offers;
+    private Set<Offer> offers = new HashSet<>();
 
     @Override
     public boolean isAccountNonExpired() {

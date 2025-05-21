@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Set;
+
 @Builder
 @Data
 public class CreateOfferRequest {
@@ -27,9 +29,12 @@ public class CreateOfferRequest {
             message = "Description must have at most {max} characters")
     private String description;
 
-    @Schema(
-            description = "The current status of the offer. Indicates whether the offer is active, archived, etc.",
-            example = "WORK_IN_PROGRESS"
-    )
+    @Schema(description = "The current status of the offer. Indicates whether the offer is active, archived, etc.",
+            example = "WORK_IN_PROGRESS")
     private OfferStatus status;
+
+    @Schema(description = "A set of tag names to categorize the offer. Each tag should match an existing tag in the system. " +
+                    "Tags help users filter and discover relevant offers.",
+            example = "[\"Electronics\", \"Gaming\"]")
+    private Set<String> tags;
 }
