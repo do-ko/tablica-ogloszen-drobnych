@@ -36,7 +36,9 @@ public class OfferController {
             description = "Allows an authenticated user with the SELLER role to create a new offer. " +
                     "The offer must include a title, description, and status (preferably WORK_IN_PROGRESS or PUBLISHED). " +
                     "The authenticated user must be the one creating the offer and must have an active (enabled) account. " +
-                    "Returns the created offer details upon success.")
+                    "Returns the created offer details upon success. " +
+                    "Contact information for the offer can either be pulled from the user's saved profile or provided directly in the request. " +
+                    "If the 'discloseSavedContactInformation' flag is set to true, any custom email or phone provided will be ignored.")
     @PostMapping()
     public ResponseEntity<CreateOfferResponse> createNewOffer(@Valid @RequestBody CreateOfferRequest createOfferRequest) {
         OfferDTO offerDTO = offerService.createOffer(createOfferRequest);

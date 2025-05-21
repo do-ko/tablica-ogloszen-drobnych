@@ -3,7 +3,9 @@ package com.webdevlab.tablicabackend.dto.request;
 import com.webdevlab.tablicabackend.constants.ValidationConstants;
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +40,23 @@ public class CreateOfferRequest {
             example = "[\"Electronics\", \"Gaming\"]")
     private Set<String> tags;
 
-    @Schema(description = "Indicates whether the seller's contact information should be disclosed to viewers of the offer.",
+    @Schema(description = "Indicates whether the seller's saved contact information should be used. " +
+            "If true, the saved contact data will be used and any provided email or phone will be ignored.",
             example = "false")
-    private boolean discloseContactInformation;
+    private boolean discloseSavedContactInformation;
+
+    @Schema(description = "Optional custom email to associate with the offer if not using saved contact information. " +
+            "Ignored if 'discloseSavedContactInformation' is true.",
+            example = "custom.email@example.com",
+            nullable = true)
+    @Email(message = "Email must be in a correct format.")
+    private String email;
+
+    @Schema(description = "Optional custom phone number to associate with the offer if not using saved contact information. " +
+            "Ignored if 'discloseSavedContactInformation' is true.",
+            example = "+48123456789",
+            nullable = true)
+    @Pattern(regexp = "^$|^\\+?[1-9]\\d{1,14}$",
+            message = "Phone number must be in a valid international format (e.g., +48123456789).")
+    private String phone;
 }

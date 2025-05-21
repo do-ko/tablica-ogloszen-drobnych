@@ -5,6 +5,7 @@ import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
 import com.webdevlab.tablicabackend.entity.offer.OfferTag;
+import com.webdevlab.tablicabackend.entity.user.ContactData;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
@@ -48,8 +49,10 @@ public class OfferService {
                 .status(request.getStatus())
                 .tags(tags);
 
-        if (request.isDiscloseContactInformation()) {
+        if (request.isDiscloseSavedContactInformation()) {
             offerBuilder.contactData(seller.getContactData());
+        } else if (request.getEmail() != null || request.getPhone() != null) {
+            offerBuilder.contactData(new ContactData(request.getEmail(), request.getPhone()));
         }
 
         return new OfferDTO(offerRepository.save(offerBuilder.build()));
