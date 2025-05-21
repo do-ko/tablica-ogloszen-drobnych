@@ -5,6 +5,7 @@ import com.webdevlab.tablicabackend.domain.enums.Role;
 import com.webdevlab.tablicabackend.entity.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,6 +51,9 @@ public class User extends Auditable implements UserDetails{
                 .toList();
     }
 
+    @Column(nullable = false)
+    private boolean isEnabled = true;
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -67,6 +71,6 @@ public class User extends Auditable implements UserDetails{
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 }

@@ -11,4 +11,9 @@ public class SecurityService {
         User user = (User) authentication.getPrincipal();
         return user.getId().equals(targetUserId);
     }
+
+    public boolean isEnabled(String targetUserId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return user.isEnabled();
+    }
 }
