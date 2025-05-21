@@ -45,4 +45,15 @@ public class OfferController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Get all published offers",
+            description = "Retrieves a paginated list of all published offers that match the given keyword. " +
+                    "The keyword is searched case-insensitively in the offer title, description, and associated tags. " +
+                    "Supports pagination and sorting using standard Pageable parameters such as page, size, and sort. " +
+                    "Returns a page of offer data with metadata like total pages and current page index.")
+    @GetMapping()
+    public ResponseEntity<Page<OfferDTO>> getAllPublishedOffers(@RequestParam(defaultValue = "") String keyword, Pageable pageable) {
+        Page<OfferDTO> offers = offerService.getAllPublishedOffers(keyword, pageable);
+        return ResponseEntity.ok(offers);
+    }
 }

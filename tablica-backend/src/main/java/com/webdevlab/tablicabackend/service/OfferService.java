@@ -1,5 +1,6 @@
 package com.webdevlab.tablicabackend.service;
 
+import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
@@ -52,6 +53,10 @@ public class OfferService {
         }
 
         return new OfferDTO(offerRepository.save(offerBuilder.build()));
+    }
+
+    public Page<OfferDTO> getAllPublishedOffers(String keyword, Pageable pageable) {
+        return offerRepository.searchOffersIncludingTags(OfferStatus.PUBLISHED, keyword, pageable).map(OfferDTO::new);
     }
 
     private String capitalize(String tag) {
