@@ -73,6 +73,11 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('SELLER') and @security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
+    @Operation(summary = "Update seller's contact information",
+            description = "Allows an authenticated user to update their own contact information, including email and phone number. " +
+                    "This is typically used by sellers who want to change the contact data associated with their profile. " +
+                    "The user must be the owner of the account to perform this operation. " +
+                    "Returns the updated user data upon success.")
     @PutMapping("/{userId}/contactData")
     public ResponseEntity<ChangeContactDataResponse> changeContactData(@PathVariable String userId,
                                                                        @Valid @RequestBody ChangeContactDataRequest request) {
