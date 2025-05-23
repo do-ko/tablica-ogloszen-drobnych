@@ -1,0 +1,97 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Przeglądaj ogłoszenia</h2>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form [formGroup]="searchForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Szukaj ogłoszeń..."
+                formControlName="searchQuery"
+              >
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-tag"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Dodaj tag..."
+                formControlName="tagInput"
+              >
+            </div>
+            <div class="position-relative">
+              <div *ngIf="tagSuggestions.length > 0" class="tag-suggestions">
+                <div
+                  *ngFor="let tag of tagSuggestions"
+                  class="tag-suggestion"
+                  (click)="addTag(tag)"
+                >
+                  {{ tag }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="selected-tags mt-3" *ngIf="selectedTags.length > 0">
+        <span class="me-2">Wybrane tagi:</span>
+        <span
+          *ngFor="let tag of selectedTags"
+          class="badge bg-primary me-2 mb-2"
+        >
+          {{ tag }}
+          <i class="bi bi-x-circle ms-1" (click)="removeTag(tag)"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Ładowanie...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && filteredOffers.length === 0" class="alert alert-info">
+    Brak ogłoszeń spełniających kryteria wyszukiwania.
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col" *ngFor="let offer of filteredOffers">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 text-truncate">{{ offer.title }}</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text">{{ offer.description | slice:0:150 }}{{ offer.description.length > 150 ? '...' : '' }}</p>
+
+          <div class="mb-3">
+            <span *ngFor="let tag of offer.tags" class="badge bg-secondary me-1 mb-1">{{ tag }}</span>
+          </div>
+
+          <div class="contact-info" *ngIf="offer.contactInfo">
+            <p *ngIf="offer.contactInfo.showEmail" class="mb-1">
+              <i class="bi bi-envelope me-2"></i>{{ offer.contactInfo.email }}
+            </p>
+            <p *ngIf="offer.contactInfo.showPhone" class="mb-1">
+              <i class="bi bi-telephone me-2"></i>{{ offer.contactInfo.phone }}
+            </p>
+          </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center bg-white">
+          <a [routerLink]="['/offers', offer.offerId]" class="btn btn-sm btn-primary">Szczegóły</a>
+          <small class="text-muted">{{ offer.createdAt | date:'dd.MM.yyyy' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

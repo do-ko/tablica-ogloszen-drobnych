@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "backend:start": "json-server backend/db.json --routes backend/routes.json --port 3000",
     "test": "ng test"
   },
   "private": true,
@@ -19,7 +20,8 @@
     "@angular/router": "^19.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0",
+    "bootstrap": "^5.3.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.11",
@@ -32,6 +34,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "json-server": "^0.17.0",
     "typescript": "~5.7.2"
   }
 }
