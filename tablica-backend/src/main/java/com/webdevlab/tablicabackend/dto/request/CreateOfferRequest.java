@@ -9,7 +9,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -51,4 +53,9 @@ public class CreateOfferRequest {
     @Pattern(regexp = "^$|^\\+?[1-9]\\d{1,14}$",
             message = "Phone number must be in a valid international format (e.g., +48123456789).")
     private String phone;
+
+    @Schema(description = "A list of files (e.g. images) to be uploaded along with the offer.",
+            type = "array",
+            implementation = MultipartFile.class)
+    private List<MultipartFile> files;
 }

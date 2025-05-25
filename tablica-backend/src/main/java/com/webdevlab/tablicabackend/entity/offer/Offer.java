@@ -8,7 +8,9 @@ import com.webdevlab.tablicabackend.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -46,4 +48,7 @@ public class Offer extends Auditable {
             joinColumns = @JoinColumn(name = "offer_id"),
             inverseJoinColumns = @JoinColumn(name = "tag"))
     private Set<OfferTag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OfferImage> images = new ArrayList<>();
 }

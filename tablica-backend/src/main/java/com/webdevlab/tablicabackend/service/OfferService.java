@@ -7,6 +7,7 @@ import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.dto.request.UpdateOfferRequest;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
+import com.webdevlab.tablicabackend.entity.offer.OfferImage;
 import com.webdevlab.tablicabackend.entity.offer.OfferTag;
 import com.webdevlab.tablicabackend.entity.user.ContactData;
 import com.webdevlab.tablicabackend.entity.user.User;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final OfferTagRepository offerTagRepository;
     private final UserRepository userRepository;
+    private final OfferImageService offerImageService;
 
     public Page<TagUsageDTO> getAllTags(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -43,22 +46,27 @@ public class OfferService {
     }
 
     public OfferDTO createOffer(User seller, CreateOfferRequest request) {
-        Offer.OfferBuilder offerBuilder = Offer.builder()
+        Offer offer = Offer.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .seller(seller)
-                .status(request.getStatus());
+                .status(request.getStatus())
+                .tags(request.getTags() != null ? getOfferTagsFromString(request.getTags()) : Collections.emptySet())
+                .contactData(
+                        (request.getEmail() != null || request.getPhone() != null)
+                                ? new ContactData(request.getEmail(), request.getPhone())
+                                : null
+                )
+                .build();
 
-        if (request.getTags() != null) {
-            Set<OfferTag> tags = getOfferTagsFromString(request.getTags());
-            offerBuilder.tags(tags);
-        } else offerBuilder.tags(Collections.emptySet());
+        List<OfferImage> images = offerImageService.uploadOfferImages(request.getFiles());
 
-        if (request.getEmail() != null || request.getPhone() != null) {
-            offerBuilder.contactData(new ContactData(request.getEmail(), request.getPhone()));
+        for (OfferImage image : images) {
+            image.setOffer(offer);
         }
-
-        return new OfferDTO(offerRepository.save(offerBuilder.build()));
+        offer.setImages(images);
+        Offer savedOffer = offerRepository.save(offer);
+        return new OfferDTO(savedOffer);
     }
 
     public Page<OfferDTO> getAllPublishedOffers(String keyword, Pageable pageable) {

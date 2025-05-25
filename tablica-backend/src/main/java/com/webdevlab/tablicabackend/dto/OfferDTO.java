@@ -6,6 +6,7 @@ import com.webdevlab.tablicabackend.entity.offer.OfferTag;
 import com.webdevlab.tablicabackend.entity.user.ContactData;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ public class OfferDTO {
     private String sellerId;
     private ContactData contactData;
     private Set<String> tags;
+    private List<OfferImageDTO> images;
 
     public OfferDTO(Offer offer) {
         this.offerId = offer.getId();
@@ -27,5 +29,8 @@ public class OfferDTO {
         this.sellerId = offer.getSeller().getId();
         this.contactData = offer.getContactData();
         this.tags = offer.getTags().stream().map(OfferTag::getTag).collect(Collectors.toSet());
+        this.images = offer.getImages().stream()
+                .map(OfferImageDTO::new)
+                .collect(Collectors.toList());
     }
 }
