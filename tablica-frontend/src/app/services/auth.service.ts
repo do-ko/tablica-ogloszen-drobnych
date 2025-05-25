@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { User, UserRole } from '../models/user.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
+import {environment} from '../enviroment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {
     const savedUser = localStorage.getItem('currentUser');

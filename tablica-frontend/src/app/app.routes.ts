@@ -14,6 +14,14 @@ export const routes: Routes = [
         path: 'offers',
         loadComponent: () => import('./components/offer-list/offer-list.component').then(m => m.OfferListComponent)
       },
+      {
+        path: 'offers/create',
+        loadComponent: () => import('./components/create-edit-offer/create-edit-offer.component').then(m => m.CreateEditOfferComponent)
+      },
+      {
+        path: 'my-offers',
+        loadComponent: () => import('./components/user-offer-list/user-offer-list.component').then(m => m.UserOfferListComponent)
+      },
     ]
   },
   { path: '**', redirectTo: 'offers' },

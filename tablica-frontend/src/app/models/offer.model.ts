@@ -15,7 +15,7 @@ export interface Offer {
 }
 
 export enum OfferStatus {
-  DRAFT,
-  PUBLISHED,
-  ARCHIVED
+  DRAFT = 'WORK_IN_PROGRESS',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVE = 'ARCHIVE'
 }

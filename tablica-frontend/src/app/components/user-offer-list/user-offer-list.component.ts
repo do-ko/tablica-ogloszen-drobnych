@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { OfferService } from '../../services/offer.service';
 import { Offer, OfferStatus } from '../../models/offer.model';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
-import {CommonModule, DatePipe, SlicePipe} from '@angular/common';
-import {RouterLink} from '@angular/router';
+import { CommonModule, DatePipe, SlicePipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-offer-list',
-  templateUrl: './offer-list.component.html',
+  selector: 'app-user-offer-list',
+  templateUrl: './user-offer-list.component.html',
   imports: [
     ReactiveFormsModule,
     SlicePipe,
@@ -21,9 +21,9 @@ import { finalize } from 'rxjs/operators';
     CommonModule,
     HeaderComponent
   ],
-  styleUrls: ['./offer-list.component.scss']
+  styleUrls: ['./user-offer-list.component.scss']
 })
-export class OfferListComponent implements OnInit {
+export class UserOfferListComponent implements OnInit {
   offers: Offer[] = [];
   filteredOffers: Offer[] = [];
   searchForm: FormGroup;
@@ -36,7 +36,8 @@ export class OfferListComponent implements OnInit {
   constructor(
     private offerService: OfferService,
     private authService: AuthService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.searchForm = this.fb.group({
       searchQuery: [''],
@@ -46,7 +47,13 @@ export class OfferListComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    this.loadOffers();
+
+    if (!this.currentUser) {
+      this.router.navigate(['/auth']);
+      return;
+    }
+
+    this.loadUserOffers();
 
     this.searchForm.get('searchQuery')?.valueChanges
       .pipe(
@@ -67,7 +74,7 @@ export class OfferListComponent implements OnInit {
               this.tagSuggestions = tags;
             },
             error => {
-              console.error('Error fetching tag suggestions', error);
+              console.error('Error occurred while loading tags', error);
               this.tagSuggestions = [];
             }
           );
@@ -77,11 +84,13 @@ export class OfferListComponent implements OnInit {
       });
   }
 
-  loadOffers(): void {
+  loadUserOffers(): void {
+    if (!this.currentUser?.userId) return;
+
     this.isLoading = true;
     this.error = null;
 
-    this.offerService.getPublishedOffers()
+    this.offerService.getUserOffers(this.currentUser.userId)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe(
         offers => {
@@ -89,25 +98,27 @@ export class OfferListComponent implements OnInit {
           this.filteredOffers = offers;
         },
         error => {
-          console.error('Error loading offers', error);
-          this.error = 'Error occured while loading offers. Please try again later.';
+          console.error('Error occurred while loading offers', error);
+          this.error = 'Could not load offers. Please try again later.';
         }
       );
   }
 
   filterOffers(): void {
+    if (!this.currentUser?.userId) return;
+
     const query = this.searchForm.get('searchQuery')?.value || '';
     this.isLoading = true;
 
-    this.offerService.searchOffers(query, this.selectedTags)
+    this.offerService.searchUserOffers(this.currentUser.userId, query, this.selectedTags)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe(
         offers => {
           this.filteredOffers = offers;
         },
         error => {
-          console.error('Error searching offers', error);
-          this.error = 'Error occured while searching offers. Please try again later.';
+          console.error('Error while searching offers', error);
+          this.error = 'Error occurred while searching offers. Please try again later.';
         }
       );
   }
@@ -139,7 +150,28 @@ export class OfferListComponent implements OnInit {
     }
   }
 
-  retryLoad(): void {
-    this.loadOffers();
+  changeStatus(offerId: string, status: OfferStatus, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.offerService.changeOfferStatus(offerId, status).subscribe(
+      updatedOffer => {
+        this.offers = this.offers.map(offer =>
+          offer.offerId === offerId ? { ...offer, status } : offer
+        );
+        this.filteredOffers = this.filteredOffers.map(offer =>
+          offer.offerId === offerId ? { ...offer, status } : offer
+        );
+      },
+      error => {
+        console.error('Error occurred while changing offer status', error);
+      }
+    );
   }
+
+  retryLoad(): void {
+    this.loadUserOffers();
+  }
+
+  protected readonly OfferStatus = OfferStatus;
 }

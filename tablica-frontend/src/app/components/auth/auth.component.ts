@@ -85,7 +85,7 @@ export class AuthComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = 'Niepoprawna nazwa użytkownika lub hasło';
+        this.errorMessage = 'Invalid username or password. Please try again.';
         console.error('Login error', error);
       }
     });
@@ -108,7 +108,7 @@ export class AuthComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = 'Błąd podczas rejestracji. Spróbuj ponownie.';
+        this.errorMessage = 'Error during registration. Please try again.';
         console.error('Registration error', error);
       }
     });

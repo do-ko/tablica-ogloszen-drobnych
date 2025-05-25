@@ -1,0 +1,59 @@
+.tag-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tag-suggestion {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.selected-tags {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+
+    i {
+      cursor: pointer;
+      margin-left: 5px;
+    }
+  }
+}
+
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-title {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.contact-info {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.btn-group .btn {
+  z-index: 1;
+}
