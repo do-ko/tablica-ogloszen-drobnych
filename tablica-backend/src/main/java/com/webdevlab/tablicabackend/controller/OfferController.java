@@ -1,9 +1,8 @@
 package com.webdevlab.tablicabackend.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
+import com.webdevlab.tablicabackend.dto.OfferImageDTO;
 import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.dto.request.UpdateOfferRequest;
@@ -15,7 +14,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -134,6 +132,30 @@ public class OfferController {
                                                             @AuthenticationPrincipal User user) {
         Page<OfferDTO> offers = offerService.getUsersOffers(userId, user, keyword, pageable);
         return ResponseEntity.ok(offers);
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Add images to an existing offer",
+            description = "Allows the offer's author to upload one or more images for an existing offer. " +
+                    "Only the owner of the offer with an enabled account can perform this action.")
+    @PostMapping(value = "/{offerId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<OfferImageDTO>> addImagesToOffer(@PathVariable String offerId,
+                                                                @RequestPart("images") List<MultipartFile> images,
+                                                                @AuthenticationPrincipal User user) {
+        List<OfferImageDTO> savedImages = offerImageService.uploadOfferImages(images, offerId, user);
+
+        return ResponseEntity.ok(savedImages);
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Delete selected images from an offer",
+            description = "Allows the offer's author to remove specific images.")
+    @DeleteMapping("/{offerId}/images")
+    public ResponseEntity<Void> deleteImages(@PathVariable String offerId,
+                                             @RequestBody List<String> imageIds,
+                                             @AuthenticationPrincipal User user) {
+        offerImageService.deleteOfferImages(offerId, imageIds, user);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -1,19 +1,19 @@
 package com.webdevlab.tablicabackend.service;
 
+import com.webdevlab.tablicabackend.dto.OfferImageDTO;
 import com.webdevlab.tablicabackend.entity.offer.Offer;
 import com.webdevlab.tablicabackend.entity.offer.OfferImage;
+import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.exception.offer.OfferNotFoundException;
+import com.webdevlab.tablicabackend.exception.offer.UnauthorizedOfferAccessException;
 import com.webdevlab.tablicabackend.repository.OfferImageRepository;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,9 +28,15 @@ import static com.webdevlab.tablicabackend.constants.ValidationConstants.OFFER_M
 @RequiredArgsConstructor
 public class OfferImageService {
 
+    private final OfferImageRepository offerImageRepository;
+    private final OfferRepository offerRepository;
+
     private final Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "offers");
 
-    public List<OfferImage> uploadOfferImages(List<MultipartFile> files) {
+    public List<OfferImageDTO> uploadOfferImages(List<MultipartFile> files, String offerId, User user) {
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException("Offer not found"));
+        if (!offer.getSeller().getId().equals(user.getId()))
+            throw new UnauthorizedOfferAccessException("Only the author of this offer is allowed to add images");
         validateFiles(files);
         try {
             Files.createDirectories(uploadDir);
@@ -49,13 +55,46 @@ public class OfferImageService {
             }
             OfferImage image = OfferImage.builder()
                     .path(filePath.toString())
+                    .offer(offer)
                     .build();
             savedImages.add(image);
         }
-        return savedImages;
+        List<OfferImage> allImages = new ArrayList<>(offer.getImages());
+        allImages.addAll(savedImages);
+        offerImageRepository.saveAll(allImages);
+        offer.setImages(allImages);
+        offerRepository.save(offer);
+
+        return allImages.stream()
+                .map(OfferImageDTO::fromEntity)
+                .toList();
     }
 
-    private void validateFiles(List<MultipartFile> files) {
+    @Transactional
+    public void deleteOfferImages(String offerId, List<String> imageIds, User user) {
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException("Offer not found"));
+        if (!offer.getSeller().getId().equals(user.getId()))
+            throw new UnauthorizedOfferAccessException("Only the author of this offer is allowed to delete its images");
+
+        List<OfferImage> imagesToDelete = offer.getImages().stream()
+                .filter(img -> imageIds.contains(img.getId()))
+                .toList();
+
+        for (OfferImage image : imagesToDelete) {
+            try {
+                Files.deleteIfExists(Paths.get(image.getPath()));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete file: " + image.getPath(), e);
+            }
+        }
+        offer.getImages().removeAll(imagesToDelete);
+
+        offerImageRepository.deleteAll(imagesToDelete);
+
+        offerRepository.save(offer);
+    }
+
+        private void validateFiles(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             return;
         }
