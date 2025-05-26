@@ -15,4 +15,8 @@ public final class ValidationConstants {
     public static final int OFFER_DESCRIPTION_MAX_LENGTH = 1500;
 
     public static final int OFFER_TAG_MAX_LENGTH = 64;
+
+    //     Files
+    public static final int OFFER_MAX_FILES = 5;
+    public static final long OFFER_MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024L;
 }

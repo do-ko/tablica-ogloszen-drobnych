@@ -2,11 +2,13 @@ package com.webdevlab.tablicabackend.controller;
 
 import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import com.webdevlab.tablicabackend.dto.OfferDTO;
+import com.webdevlab.tablicabackend.dto.OfferImageDTO;
 import com.webdevlab.tablicabackend.dto.TagUsageDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateOfferRequest;
 import com.webdevlab.tablicabackend.dto.request.UpdateOfferRequest;
 import com.webdevlab.tablicabackend.dto.response.CreateOfferResponse;
 import com.webdevlab.tablicabackend.entity.user.User;
+import com.webdevlab.tablicabackend.service.OfferImageService;
 import com.webdevlab.tablicabackend.service.OfferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,10 +16,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/offer")
@@ -25,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Offer")
 public class OfferController {
     private final OfferService offerService;
+    private final OfferImageService offerImageService;
 
     @PreAuthorize("@security.isEnabled(authentication)")
     @Operation(summary = "Get all tags sorted by usage",
@@ -126,4 +133,29 @@ public class OfferController {
         Page<OfferDTO> offers = offerService.getUsersOffers(userId, user, keyword, pageable);
         return ResponseEntity.ok(offers);
     }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Add images to an existing offer",
+            description = "Allows the offer's author to upload one or more images for an existing offer. " +
+                    "Only the owner of the offer with an enabled account can perform this action.")
+    @PostMapping(value = "/{offerId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<OfferImageDTO>> addImagesToOffer(@PathVariable String offerId,
+                                                                @RequestPart("images") List<MultipartFile> images,
+                                                                @AuthenticationPrincipal User user) {
+        List<OfferImageDTO> savedImages = offerImageService.uploadOfferImages(images, offerId, user);
+
+        return ResponseEntity.ok(savedImages);
+    }
+
+    @PreAuthorize("hasRole('SELLER') and @security.isEnabled(authentication)")
+    @Operation(summary = "Delete selected images from an offer",
+            description = "Allows the offer's author to remove specific images.")
+    @DeleteMapping("/{offerId}/images")
+    public ResponseEntity<Void> deleteImages(@PathVariable String offerId,
+                                             @RequestBody List<String> imageIds,
+                                             @AuthenticationPrincipal User user) {
+        offerImageService.deleteOfferImages(offerId, imageIds, user);
+        return ResponseEntity.noContent().build();
+    }
+
 }

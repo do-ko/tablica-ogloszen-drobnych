@@ -6,13 +6,17 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpdateOfferRequest {
     @Schema(description = "The title of the offer. Should be concise and descriptive.", example = "Updated Bicycle for Sale")
     @NotBlank(message = "Title must not be empty or contain only whitespaces")
