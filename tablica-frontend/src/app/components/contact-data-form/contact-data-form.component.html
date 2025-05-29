@@ -1,0 +1,64 @@
+<div class="container mt-4">
+  <app-header [currentUser]="currentUser"></app-header>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">Update Contact Information</h4>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email address</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                formControlName="email"
+                placeholder="Enter your email address"
+              >
+              <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="text-danger mt-1">
+                Please enter a valid email address.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone number</label>
+              <input
+                type="text"
+                class="form-control"
+                id="phone"
+                formControlName="phone"
+                placeholder="Enter your phone number (e.g. +48123456789)"
+              >
+              <div *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched" class="text-danger mt-1">
+                Please enter a valid phone number in international format (e.g., +48123456789).
+              </div>
+            </div>
+
+            <div class="alert alert-success" *ngIf="isSuccess">
+              Contact information updated successfully!
+            </div>
+
+            <div class="alert alert-danger" *ngIf="error">
+              {{ error }}
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary me-md-2" [routerLink]="['/profile']">Cancel</button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="contactForm.invalid || isLoading"
+              >
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

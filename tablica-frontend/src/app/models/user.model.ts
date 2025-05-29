@@ -1,19 +1,16 @@
 export interface User {
   userId: string;
   userName: string;
-  email: string;
-  phone?: string;
   roles: Set<UserRole>;
-  contactInfo: ContactInfo;
+  contactData: ContactData;
 }
 
 export enum UserRole {
   BUYER,
   SELLER,
-  BOTH
 }
 
-export interface ContactInfo {
+export interface ContactData {
   phone?: string;
   email?: string;
   showPhone: boolean;

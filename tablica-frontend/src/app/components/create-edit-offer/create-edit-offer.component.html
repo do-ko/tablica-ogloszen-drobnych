@@ -1,6 +1,6 @@
 <div class="container mt-4">
   <app-header [currentUser]="currentUser"></app-header>
-  <h2 class="mb-4">{{ isEditMode ? 'Edytuj ofertę' : 'Utwórz nową ofertę' }}</h2>
+  <h2 class="mb-4">{{ isEditMode ? 'Edit offer' : 'Create new offer' }}</h2>
 
   <div *ngIf="isLoading" class="text-center mb-4">
     <div class="spinner-border text-primary" role="status">
@@ -24,7 +24,7 @@
             class="form-control form-control-lg"
             id="title"
             formControlName="title"
-            placeholder="Tytuł"
+            placeholder="Title"
             [ngClass]="{'is-invalid': offerForm.get('title')?.invalid && offerForm.get('title')?.touched}"
           >
           <div class="invalid-feedback" *ngIf="offerForm.get('title')?.errors?.['required']">
@@ -78,7 +78,7 @@
               placeholder="Add tags... (e.g. electronics, furniture)"
             >
             <button class="btn btn-primary" type="button" (click)="addTag(offerForm.get('tagInput')?.value)">
-              Dodaj
+              Add
             </button>
           </div>
 
@@ -91,11 +91,14 @@
             </span>
           </div>
 
-          <div class="selected-tags" *ngIf="selectedTags.length > 0">
+          <div class="selected-tags mt-3" *ngIf="selectedTags.length > 0">
             <small class="text-muted d-block mb-2">Selected tags:</small>
-            <span class="badge bg-primary me-2 mb-2 tag-selected" *ngFor="let tag of selectedTags">
+            <span
+              *ngFor="let tag of selectedTags"
+              class="badge bg-primary me-2 mb-2"
+            >
               {{ tag }}
-              <i class="bi bi-x ms-1 tag-remove" (click)="removeTag(tag)"></i>
+              <i class="bi bi-x-circle ms-1" (click)="removeTag(tag)"></i>
             </span>
           </div>
         </div>
@@ -115,7 +118,7 @@
                 id="contactEmail"
                 formControlName="contactEmail"
                 placeholder="email@example.com"
-                [ngClass]="{'is-invalid': offerForm.get('contactEmail')?.invalid && offerForm.get('contactEmail')?.touched}"
+                [readonly]=true
               >
               <div class="invalid-feedback" *ngIf="offerForm.get('contactEmail')?.errors?.['email']">
                 Invalid email format.
@@ -128,6 +131,7 @@
                 id="contactPhone"
                 formControlName="contactPhone"
                 placeholder="+48 123 456 789"
+                [readonly]=true
               >
             </div>
           </div>

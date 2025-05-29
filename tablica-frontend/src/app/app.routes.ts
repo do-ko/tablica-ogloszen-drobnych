@@ -5,7 +5,6 @@ import { OfferListComponent } from './components/offer-list/offer-list.component
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
-  // { path: 'offers', component: OfferListComponent },
   {
     path: '',
     canActivate: [authGuard],
@@ -15,12 +14,24 @@ export const routes: Routes = [
         loadComponent: () => import('./components/offer-list/offer-list.component').then(m => m.OfferListComponent)
       },
       {
+        path: 'offers/:id',
+        loadComponent: () => import('./components/offer-detail/offer-detail.component').then(m => m.OfferDetailComponent)
+      },
+      {
         path: 'offers/create',
+        loadComponent: () => import('./components/create-edit-offer/create-edit-offer.component').then(m => m.CreateEditOfferComponent)
+      },
+      {
+        path: 'offers/edit/:id',
         loadComponent: () => import('./components/create-edit-offer/create-edit-offer.component').then(m => m.CreateEditOfferComponent)
       },
       {
         path: 'my-offers',
         loadComponent: () => import('./components/user-offer-list/user-offer-list.component').then(m => m.UserOfferListComponent)
+      },
+      {
+        path: 'contact-data',
+        loadComponent: () => import('./components/contact-data-form/contact-data-form.component').then(m => m.ContactDataFormComponent)
       },
     ]
   },

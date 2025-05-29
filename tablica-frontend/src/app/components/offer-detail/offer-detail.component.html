@@ -1,0 +1,148 @@
+<div class="container mt-4">
+  <app-header [currentUser]="currentUser"></app-header>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-4">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && offer" class="offer-detail">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <a [routerLink]="['/offers']" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left"></i> Back to offers
+        </a>
+      </div>
+      <div *ngIf="isOwner" class="action-buttons">
+        <button class="btn btn-outline-primary me-2" (click)="editOffer()">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button class="btn btn-outline-danger" (click)="archiveOffer()">
+          <i class="bi bi-archive"></i> Archive
+        </button>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h1 class="card-title display-6 mb-3">{{ offer.title }}</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="text-muted">
+            <small>Added: {{ formatDate(offer.createdAt) }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <!-- Zdjęcia -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Images</h5>
+            <div class="image-gallery position-relative">
+              <div *ngIf="offer.images.length === 0" class="text-center py-5 bg-light">
+                <i class="bi bi-image display-4 text-muted"></i>
+                <p class="mt-3 text-muted">No images</p>
+              </div>
+              <div *ngIf="offer.images.length > 0" class="main-image-container">
+                <img [src]="offer.images[currentImageIndex]" class="img-fluid rounded" alt="Offer Image">
+                <div class="navigation-buttons" *ngIf="offer.images.length > 1">
+                  <button class="btn btn-light btn-sm" (click)="prevImage()">
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                  <button class="btn btn-light btn-sm" (click)="nextImage()">
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="image-thumbnails d-flex mt-3 overflow-auto" *ngIf="offer.images.length > 1">
+                <div *ngFor="let image of offer.images; let i = index"
+                     class="thumbnail me-2"
+                     [class.active]="i === currentImageIndex"
+                     (click)="currentImageIndex = i">
+                  <img [src]="image" class="img-thumbnail" alt="Thumbnail">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opis -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Description</h5>
+            <div class="description">
+              <p class="white-space-pre-line">{{ offer.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <!-- Dane kontaktowe -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Contact information</h5>
+            <div class="contact-details">
+<!--              <div *ngIf="offer.contactInfo.showEmail" class="mb-2">-->
+<!--                <i class="bi bi-envelope me-2"></i> {{ offer.contactInfo.email }}-->
+<!--              </div>-->
+<!--              <div *ngIf="offer.contactInfo.showPhone" class="mb-2">-->
+<!--                <i class="bi bi-telephone me-2"></i> {{ offer.contactInfo.phone }}-->
+<!--              </div>-->
+              <div class="text-muted">
+                <p>Seller didn't provide contact information.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tagi -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Tags</h5>
+            <div class="tags">
+              <span *ngFor="let tag of offer.tags" class="badge bg-primary me-2 mb-2">{{ tag }}</span>
+              <p *ngIf="offer.tags.length === 0" class="text-muted">No tags were provided</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informacje dodatkowe -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Additional information</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between">
+                <span>Creation date:</span>
+                <span>{{ formatDate(offer.createdAt) }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>Last updated:</span>
+                <span>{{ formatDate(offer.updatedAt) }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>Status:</span>
+                <span class="badge" [ngClass]="{
+                  'bg-secondary': offer.status === 'WORK_IN_PROGRESS',
+                  'bg-success': offer.status === 'PUBLISHED',
+                  'bg-danger': offer.status === 'ARCHIVE'
+                }">
+                  {{ offer.status === 'WORK_IN_PROGRESS' ? 'DRAFT' :
+                  offer.status === 'PUBLISHED' ? 'ACTIVE' :
+                    offer.status === 'ARCHIVE' ? 'ARCHIVED' : offer.status }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

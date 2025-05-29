@@ -56,26 +56,6 @@
     }
   }
 
-  // Category selector
-  .category-selector {
-    .btn {
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: left;
-      background-color: #f8f9fa;
-      border-color: #dee2e6;
-
-      &:hover {
-        background-color: #e9ecef;
-        border-color: #adb5bd;
-      }
-
-      i {
-        font-size: 1.2rem;
-      }
-    }
-  }
-
   .description-editor {
     .editor-toolbar {
       padding: 0.5rem;
@@ -114,17 +94,13 @@
   }
 
   .selected-tags {
-    .tag-selected {
-      position: relative;
-      padding-right: 2rem;
+    .badge {
+      display: inline-flex;
+      align-items: center;
 
-      .tag-remove {
+      i {
         cursor: pointer;
-        transition: color 0.2s ease;
-
-        &:hover {
-          color: #fff;
-        }
+        margin-left: 5px;
       }
     }
   }

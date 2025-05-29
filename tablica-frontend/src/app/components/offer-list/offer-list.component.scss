@@ -36,6 +36,21 @@
 
 .card {
   transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .card-body {
+    flex: 1;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    min-height: 40px; // Adjust this value as needed
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   &:hover {
     transform: translateY(-5px);

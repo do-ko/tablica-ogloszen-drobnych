@@ -37,61 +37,52 @@ export class CreateEditOfferComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
+    this.currentUser = this.authService.getCurrentUser();
+
     this.offerForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       tagInput: [''],
-      contactEmail: [this.currentUser?.email || '', [Validators.email]],
-      contactPhone: [''],
-      showEmail: [true],
+      contactEmail: [this.currentUser?.contactData.email],
+      contactPhone: [this.currentUser?.contactData.phone],
+      showEmail: [false],
       showPhone: [false]
     });
   }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-
-    if (!this.currentUser) {
-      this.router.navigate(['/auth']);
-      return;
-    }
-
     const offerId = this.route.snapshot.paramMap.get('id');
     if (offerId) {
       this.isEditMode = true;
       this.isLoading = true;
 
-      this.offerService.getOffers().subscribe(offers => {
-        const offer = offers.find(o => o.offerId === offerId);
+      this.offerService.getOfferById(offerId).subscribe({
+        next: (offer) => {
+          if (offer.status === OfferStatus.ARCHIVE) {
+            this.router.navigate(['/my-offers']);
+            return;
+          }
 
-        if (!offer) {
+          if (offer.sellerId !== this.currentUser?.userId) {
+            this.router.navigate(['/my-offers']);
+            return;
+          }
+
+          this.existingOffer = offer;
+          this.selectedTags = [...offer.tags];
+
+          this.offerForm.patchValue({
+            title: offer.title,
+            description: offer.description,
+          });
+
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading offer', error);
           this.router.navigate(['/my-offers']);
-          return;
+          this.isLoading = false;
         }
-
-        if (offer.status === OfferStatus.ARCHIVE) {
-          this.router.navigate(['/my-offers']);
-          return;
-        }
-
-        if (offer.sellerId !== this.currentUser?.userId) {
-          this.router.navigate(['/my-offers']);
-          return;
-        }
-
-        this.existingOffer = offer;
-        this.selectedTags = [...offer.tags];
-
-        this.offerForm.patchValue({
-          title: offer.title,
-          description: offer.description,
-          contactEmail: offer.contactInfo.email,
-          contactPhone: offer.contactInfo.phone,
-          showEmail: offer.contactInfo.showEmail,
-          showPhone: offer.contactInfo.showPhone
-        });
-
-        this.isLoading = false;
       });
     }
 
@@ -182,7 +173,7 @@ export class CreateEditOfferComponent implements OnInit {
   }
 
   get canPublish(): boolean {
-    return !this.existingOffer || this.existingOffer.status !== OfferStatus.PUBLISHED;
+    return true;
   }
 
   get canSaveAsDraft(): boolean {

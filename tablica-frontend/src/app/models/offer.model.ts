@@ -1,4 +1,4 @@
-import {ContactInfo} from './user.model';
+import {ContactData} from './user.model';
 
 export interface Offer {
   offerId: string;
@@ -6,12 +6,11 @@ export interface Offer {
   description: string;
   images: string[];
   tags: string[];
-  contactInfo: ContactInfo;
+  contactInfo: ContactData;
   sellerId: string;
   status: OfferStatus;
   createdAt: Date;
   updatedAt: Date;
-  previewToken?: string;
 }
 
 export enum OfferStatus {
