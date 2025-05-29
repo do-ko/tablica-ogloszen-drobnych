@@ -16,6 +16,7 @@ export class AuthComponent implements OnInit {
   loginForm: FormGroup;
   registerForm: FormGroup;
   errorMessage: string = '';
+  successMessage: string = '';
   isLoading: boolean = false;
 
   constructor(
@@ -56,6 +57,7 @@ export class AuthComponent implements OnInit {
   setActiveTab(tab: 'login' | 'register'): void {
     this.activeTab = tab;
     this.errorMessage = '';
+    this.successMessage = '';
 
     if (tab === 'login') {
       this.loginForm.reset();
@@ -104,7 +106,8 @@ export class AuthComponent implements OnInit {
     this.authService.register(username, password).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/offers']);
+        this.setActiveTab('login');
+        this.successMessage = 'Account created successfully. You can now log in.';
       },
       error: (error) => {
         this.isLoading = false;

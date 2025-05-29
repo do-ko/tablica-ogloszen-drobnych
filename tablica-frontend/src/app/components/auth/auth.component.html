@@ -25,6 +25,7 @@
                   <div *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 12 characters</div>
                 </div>
               </div>
+              <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
               <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <button class="btn btn-primary" type="submit" [disabled]="loginForm.invalid || isLoading">
                 {{ isLoading ? 'Loading...' : 'Submit' }}

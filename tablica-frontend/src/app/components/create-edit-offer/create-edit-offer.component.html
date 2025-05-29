@@ -119,9 +119,6 @@
                 formControlName="contactEmail"
                 [readonly]=true
               >
-              <div class="invalid-feedback" *ngIf="offerForm.get('contactEmail')?.errors?.['email']">
-                Invalid email format.
-              </div>
             </div>
             <div class="col-md-6">
               <input
