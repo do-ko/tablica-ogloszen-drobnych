@@ -90,13 +90,13 @@
           <div class="card-body">
             <h5 class="card-title fw-bold mb-3">Contact information</h5>
             <div class="contact-details">
-<!--              <div *ngIf="offer.contactInfo.showEmail" class="mb-2">-->
-<!--                <i class="bi bi-envelope me-2"></i> {{ offer.contactInfo.email }}-->
-<!--              </div>-->
-<!--              <div *ngIf="offer.contactInfo.showPhone" class="mb-2">-->
-<!--                <i class="bi bi-telephone me-2"></i> {{ offer.contactInfo.phone }}-->
-<!--              </div>-->
-              <div class="text-muted">
+              <div *ngIf="hasContactEmail()" class="mb-2">
+                <i class="bi bi-envelope me-2"></i> {{ offer.contactData.email }}
+              </div>
+              <div *ngIf="hasContactPhone()" class="mb-2">
+                <i class="bi bi-telephone me-2"></i> {{ offer.contactData.phone }}
+              </div>
+              <div class="text-muted" *ngIf="!hasAnyContactInfo()">
                 <p>Seller didn't provide contact information.</p>
               </div>
             </div>

@@ -13,6 +13,4 @@ export enum UserRole {
 export interface ContactData {
   phone?: string;
   email?: string;
-  showPhone: boolean;
-  showEmail: boolean;
 }

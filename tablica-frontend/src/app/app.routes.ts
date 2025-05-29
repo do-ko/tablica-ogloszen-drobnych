@@ -14,12 +14,12 @@ export const routes: Routes = [
         loadComponent: () => import('./components/offer-list/offer-list.component').then(m => m.OfferListComponent)
       },
       {
-        path: 'offers/:id',
-        loadComponent: () => import('./components/offer-detail/offer-detail.component').then(m => m.OfferDetailComponent)
-      },
-      {
         path: 'offers/create',
         loadComponent: () => import('./components/create-edit-offer/create-edit-offer.component').then(m => m.CreateEditOfferComponent)
+      },
+      {
+        path: 'offers/:id/details',
+        loadComponent: () => import('./components/offer-detail/offer-detail.component').then(m => m.OfferDetailComponent)
       },
       {
         path: 'offers/edit/:id',

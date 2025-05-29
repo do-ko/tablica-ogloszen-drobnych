@@ -73,7 +73,7 @@
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     <div class="col" *ngFor="let offer of filteredOffers">
       <div class="card h-100">
-        <a [routerLink]="['/offers', offer.offerId]" class="text-decoration-none text-dark">
+        <a [routerLink]="['/offers', offer.offerId, 'details']" class="text-decoration-none text-dark">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0 text-truncate">{{ offer.title }}</h5>
             <span [ngClass]="getStatusClass(offer.status)">{{ offer.status }}</span>

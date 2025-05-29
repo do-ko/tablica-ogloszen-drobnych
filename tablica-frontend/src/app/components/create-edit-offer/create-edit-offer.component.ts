@@ -25,7 +25,6 @@ export class CreateEditOfferComponent implements OnInit {
   existingOffer: Offer | null = null;
   isLoading = false;
   errorMessage = '';
-  tagInput = '';
   selectedTags: string[] = [];
   tagSuggestions: string[] = [];
   currentUser: User | null = null;
@@ -43,8 +42,8 @@ export class CreateEditOfferComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(5)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       tagInput: [''],
-      contactEmail: [this.currentUser?.contactData.email],
-      contactPhone: [this.currentUser?.contactData.phone],
+      contactEmail: [this.currentUser?.contactData?.email ?? ""],
+      contactPhone: [this.currentUser?.contactData?.phone ?? ""],
       showEmail: [false],
       showPhone: [false]
     });
@@ -95,6 +94,39 @@ export class CreateEditOfferComponent implements OnInit {
         this.tagSuggestions = [];
       }
     });
+
+    this.updateEmailControlState(this.offerForm.get('contactEmail')?.value);
+    this.updatePhoneControlState(this.offerForm.get('contactPhone')?.value);
+  }
+
+  private updateEmailControlState(email: string): void {
+    const showEmailControl = this.offerForm.get('showEmail');
+
+    if (showEmailControl === null) {
+      return;
+    }
+
+    if (!email || email.trim() === '') {
+      showEmailControl.disable();
+      showEmailControl.setValue(false);
+    } else {
+      showEmailControl.enable();
+    }
+  }
+
+  private updatePhoneControlState(phone: string): void {
+    const showPhoneControl = this.offerForm.get('showPhone');
+
+    if (showPhoneControl === null) {
+      return;
+    }
+
+    if (!phone || phone.trim() === '') {
+      showPhoneControl.disable();
+      showPhoneControl.setValue(false);
+    } else {
+      showPhoneControl.enable();
+    }
   }
 
   addTag(tag: string): void {
@@ -130,12 +162,8 @@ export class CreateEditOfferComponent implements OnInit {
       title: formValue.title,
       description: formValue.description,
       tags: this.selectedTags,
-      contactInfo: {
-        email: formValue.contactEmail,
-        phone: formValue.contactPhone,
-        showEmail: formValue.showEmail,
-        showPhone: formValue.showPhone
-      },
+      email: formValue.showEmail ? formValue.contactEmail : '',
+      phone: formValue.showPhone ? formValue.contactPhone : '',
       images: this.existingOffer?.images || [],
       sellerId: this.currentUser?.userId || '',
       status: status

@@ -99,4 +99,16 @@ export class OfferDetailComponent implements OnInit {
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('pl-PL');
   }
+
+  hasContactEmail(): boolean {
+    return !!this.offer?.contactData?.email && this.offer.contactData.email.trim() !== '';
+  }
+
+  hasContactPhone(): boolean {
+    return !!this.offer?.contactData?.phone && this.offer.contactData.phone.trim() !== '';
+  }
+
+  hasAnyContactInfo(): boolean {
+    return this.hasContactEmail() || this.hasContactPhone();
+  }
 }

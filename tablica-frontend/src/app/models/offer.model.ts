@@ -6,7 +6,7 @@ export interface Offer {
   description: string;
   images: string[];
   tags: string[];
-  contactInfo: ContactData;
+  contactData: ContactData;
   sellerId: string;
   status: OfferStatus;
   createdAt: Date;
