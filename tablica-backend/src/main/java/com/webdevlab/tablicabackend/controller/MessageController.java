@@ -1,12 +1,10 @@
 package com.webdevlab.tablicabackend.controller;
 
 import com.webdevlab.tablicabackend.dto.MessageDTO;
-import com.webdevlab.tablicabackend.dto.request.SendMessageRequest;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,21 +23,11 @@ public class MessageController {
     private final MessageService messageService;
 
     @PreAuthorize("@security.isEnabled(authentication)")
-    @Operation(summary = "Send a message",
-            description = "Sends a message from the authenticated user to another user. Returns the created message.")
-    @PostMapping("/send")
-    public ResponseEntity<MessageDTO> sendMessage(@AuthenticationPrincipal User user,
-                                                  @Valid @RequestBody SendMessageRequest request) {
-        MessageDTO sent = messageService.sendMessage(user, request);
-        return ResponseEntity.ok(sent);
-    }
-
-    @PreAuthorize("@security.isEnabled(authentication)")
     @Operation(summary = "Get inbox",
             description = "Returns a paginated list of received messages for the authenticated user.")
     @GetMapping("/inbox")
     public ResponseEntity<Page<MessageDTO>> getInbox(@AuthenticationPrincipal User user,
-                                                     @PageableDefault(size = 10, sort = "sentAt", direction = Sort.Direction.DESC)
+                                                     @PageableDefault(sort = "sentAt", direction = Sort.Direction.DESC)
                                                      Pageable pageable) {
         Page<MessageDTO> inbox = messageService.getInbox(user, pageable);
         return ResponseEntity.ok(inbox);
@@ -50,7 +38,7 @@ public class MessageController {
             description = "Returns a paginated list of messages sent by the authenticated user.")
     @GetMapping("/sent")
     public ResponseEntity<Page<MessageDTO>> getSentMessages(@AuthenticationPrincipal User user,
-                                                            @PageableDefault(size = 10, sort = "sentAt", direction = Sort.Direction.DESC)
+                                                            @PageableDefault(sort = "sentAt", direction = Sort.Direction.DESC)
                                                             Pageable pageable) {
         Page<MessageDTO> sent = messageService.getSent(user, pageable);
         return ResponseEntity.ok(sent);
