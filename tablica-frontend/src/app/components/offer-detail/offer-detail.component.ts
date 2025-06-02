@@ -55,7 +55,7 @@ export class OfferDetailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading offer', error);
-        this.errorMessage = 'Nie udało się załadować oferty. Spróbuj ponownie później.';
+        this.errorMessage = 'Could not load the offer. Please try again later.';
         this.isLoading = false;
       }
     });
@@ -81,7 +81,7 @@ export class OfferDetailComponent implements OnInit {
 
   archiveOffer(): void {
     if (this.offer) {
-      if (confirm('Czy na pewno chcesz zarchiwizować tę ofertę?')) {
+      if (confirm('Are you sure to archive this offer?')) {
         const updatedOffer = { ...this.offer, status: OfferStatus.ARCHIVE };
         this.offerService.updateOffer(this.offer.offerId, updatedOffer).subscribe({
           next: () => {
@@ -89,7 +89,7 @@ export class OfferDetailComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error archiving offer', error);
-            this.errorMessage = 'Nie udało się zarchiwizować oferty. Spróbuj ponownie później.';
+            this.errorMessage = 'Could not archive the offer. Please try again later.';
           }
         });
       }

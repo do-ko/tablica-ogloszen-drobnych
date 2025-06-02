@@ -43,8 +43,8 @@ export class ContactDataFormComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
 
     this.contactForm.patchValue({
-      email: this.currentUser!!.contactData.email,
-      phone: this.currentUser!!.contactData.phone
+      email: this.currentUser?.contactData?.email ?? "",
+      phone: this.currentUser?.contactData?.phone ?? ""
     });
   }
 
