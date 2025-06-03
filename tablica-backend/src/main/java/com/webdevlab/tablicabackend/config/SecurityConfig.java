@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/webjars/**",
             "/api/auth/login",
             "/api/auth/register",
-            "/ws/**"
+            "/ws/**",
+            "/uploads/**",
     };
 
 

@@ -9,6 +9,7 @@ import com.webdevlab.tablicabackend.exception.offer.UnauthorizedOfferAccessExcep
 import com.webdevlab.tablicabackend.repository.OfferImageRepository;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,13 +32,28 @@ public class OfferImageService {
     private final OfferImageRepository offerImageRepository;
     private final OfferRepository offerRepository;
 
-    private final Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "offers");
+    @Value("${app.upload.dir:${user.dir}/uploads}")
+    private String uploadDirRoot;
+
+    private Path getUploadDir() {
+        return Paths.get(uploadDirRoot, "offers");
+    }
+
+    private String convertPathToRelativeUrl(String filePath) {
+        int uploadsIndex = filePath.indexOf("uploads");
+        if (uploadsIndex != -1) {
+            return "/" + filePath.substring(uploadsIndex);
+        }
+        return filePath;
+    }
 
     public List<OfferImageDTO> uploadOfferImages(List<MultipartFile> files, String offerId, User user) {
         Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException("Offer not found"));
         if (!offer.getSeller().getId().equals(user.getId()))
             throw new UnauthorizedOfferAccessException("Only the author of this offer is allowed to add images");
         validateFiles(files);
+
+        Path uploadDir = getUploadDir();
         try {
             Files.createDirectories(uploadDir);
         } catch (IOException e) {
@@ -66,7 +82,11 @@ public class OfferImageService {
         offerRepository.save(offer);
 
         return allImages.stream()
-                .map(OfferImageDTO::fromEntity)
+                .map(image -> {
+                    OfferImageDTO dto = new OfferImageDTO(image);
+                    dto.setPath(convertPathToRelativeUrl(image.getPath()));
+                    return dto;
+                })
                 .toList();
     }
 

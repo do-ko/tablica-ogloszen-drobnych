@@ -66,6 +66,53 @@
     <div class="card mb-4 form-card">
       <div class="card-body">
         <div class="form-section">
+          <label class="form-label fw-bold">Images</label>
+          <p class="form-text text-muted mb-3">Add photos to make your offer more attractive</p>
+
+          <div class="drop-zone"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)"
+               [class.active]="isDragActive">
+            <div class="drop-zone-content">
+              <i class="bi bi-cloud-upload fs-2 mb-2"></i>
+              <p class="mb-1">Drag & drop images here</p>
+              <p class="text-muted small">or</p>
+              <button type="button" class="btn btn-outline-primary" (click)="fileInput.click()">
+                Select files
+              </button>
+              <input type="file" #fileInput class="d-none" (change)="onFileSelected($event)" multiple accept="image/*">
+            </div>
+          </div>
+
+          <div class="alert alert-danger mt-3" *ngIf="imageUploadError">
+            {{ imageUploadError }}
+          </div>
+
+          <div class="images-container mt-3">
+            <div class="row g-3" *ngIf="existingImages.length > 0 || selectedImages.length > 0">
+              <div class="col-lg-2 col-md-4 col-sm-6" *ngFor="let image of existingImages">
+                <div class="image-preview-container">
+                  <img [src]="getImageUrl(image.path)" class="img-thumbnail image-preview">
+                  <button type="button" class="btn-close image-remove" (click)="removeExistingImage(image.id)"></button>
+                </div>
+              </div>
+
+              <div class="col-lg-2 col-md-4 col-sm-6" *ngFor="let image of selectedImages; let i = index">
+                <div class="image-preview-container">
+                  <img [src]="image.preview" class="img-thumbnail image-preview">
+                  <button type="button" class="btn-close image-remove" (click)="removeImage(i)"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4 form-card">
+      <div class="card-body">
+        <div class="form-section">
           <label for="tagInput" class="form-label fw-bold">Tags</label>
           <p class="form-text text-muted mb-3">Add tags to help buyers find your offer</p>
 

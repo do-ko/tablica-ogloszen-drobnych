@@ -1,12 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OfferService } from '../../services/offer.service';
 import { AuthService } from '../../services/auth.service';
-import { Offer, OfferStatus } from '../../models/offer.model';
+import {Offer, OfferImage, OfferStatus} from '../../models/offer.model';
 import { HeaderComponent } from '../header/header.component';
 import { User } from '../../models/user.model';
+import { finalize } from 'rxjs/operators';
+import {environment} from '../../enviroment';
+
+
+interface ImageFile {
+  file: File;
+  preview: string;
+}
 
 @Component({
   selector: 'app-create-edit-offer',
@@ -20,6 +28,8 @@ import { User } from '../../models/user.model';
   ]
 })
 export class CreateEditOfferComponent implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   offerForm: FormGroup;
   isEditMode = false;
   existingOffer: Offer | null = null;
@@ -28,6 +38,16 @@ export class CreateEditOfferComponent implements OnInit {
   selectedTags: string[] = [];
   tagSuggestions: string[] = [];
   currentUser: User | null = null;
+
+  selectedImages: ImageFile[] = [];
+  isDragActive = false;
+  imageUploadError = '';
+  maxFileSize = 5 * 1024 * 1024;
+  maxFiles = 10;
+  allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+  existingImages: OfferImage[] = [];
+  imagesToDelete: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -74,6 +94,10 @@ export class CreateEditOfferComponent implements OnInit {
             title: offer.title,
             description: offer.description,
           });
+
+          if (this.isEditMode && offer.images && offer.images.length > 0) {
+            this.existingImages = offer.images;
+          }
 
           this.isLoading = false;
         },
@@ -149,6 +173,78 @@ export class CreateEditOfferComponent implements OnInit {
     this.saveOffer(OfferStatus.PUBLISHED);
   }
 
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragActive = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragActive = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragActive = false;
+
+    if (event.dataTransfer?.files) {
+      this.handleFiles(event.dataTransfer.files);
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.handleFiles(input.files);
+    }
+  }
+
+  handleFiles(files: FileList): void {
+    this.imageUploadError = '';
+
+    // Sprawdź czy nie przekroczono limitu plików
+    if (this.selectedImages.length + files.length > this.maxFiles) {
+      this.imageUploadError = `Możesz dodać maksymalnie ${this.maxFiles} obrazów.`;
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      // Sprawdź typ pliku
+      if (!this.allowedTypes.includes(file.type)) {
+        this.imageUploadError = 'Dozwolone są tylko obrazy w formatach: JPG, PNG, WebP i GIF.';
+        return;
+      }
+
+      // Sprawdź rozmiar pliku
+      if (file.size > this.maxFileSize) {
+        this.imageUploadError = 'Maksymalny rozmiar pliku to 5MB.';
+        return;
+      }
+
+      // Utwórz podgląd obrazu
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        this.selectedImages.push({
+          file: file,
+          preview: e.target?.result as string
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Zresetuj input po wybraniu plików
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  removeImage(index: number): void {
+    this.selectedImages.splice(index, 1);
+  }
+
   private saveOffer(status: OfferStatus): void {
     if (this.offerForm.invalid) {
       this.offerForm.markAllAsTouched();
@@ -164,36 +260,91 @@ export class CreateEditOfferComponent implements OnInit {
       tags: this.selectedTags,
       email: formValue.showEmail ? formValue.contactEmail : '',
       phone: formValue.showPhone ? formValue.contactPhone : '',
-      images: this.existingOffer?.images || [],
       sellerId: this.currentUser?.userId || '',
       status: status
     };
 
     if (this.isEditMode && this.existingOffer) {
       this.offerService.updateOffer(this.existingOffer.offerId, offerData).subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.router.navigate(['/my-offers']);
+        next: (updatedOffer) => {
+          this.processImageChanges(this.existingOffer!.offerId);
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Error occurred while updating the offer.';
-          console.error('Error updating offer', error);
+          this.errorMessage = 'Wystąpił błąd podczas aktualizacji oferty.';
+          console.error('Błąd aktualizacji oferty', error);
         }
       });
     } else {
       this.offerService.createOffer(offerData as any).subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.router.navigate(['/my-offers']);
+        next: (createdOffer) => {
+          if (this.selectedImages.length > 0) {
+            this.uploadImages(createdOffer.offerId);
+          } else {
+            this.isLoading = false;
+            this.router.navigate(['/my-offers']);
+          }
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Error occurred while creating the offer.';
-          console.error('Error creating offer', error);
+          this.errorMessage = 'Wystąpił błąd podczas tworzenia oferty.';
+          console.error('Błąd tworzenia oferty', error);
         }
       });
     }
+  }
+
+  private uploadImages(offerId: string): void {
+    const formData = new FormData();
+    this.selectedImages.forEach(imageFile => {
+      formData.append('images', imageFile.file);
+    });
+
+    this.offerService.addImagesToOffer(offerId, formData)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+        this.router.navigate(['/my-offers']);
+      }))
+      .subscribe({
+        error: (error) => {
+          console.error('Error uploading images', error);
+          this.errorMessage = 'Offer was created but there was an error uploading images.';
+        }
+      });
+  }
+
+  private processImageChanges(offerId: string): void {
+    if (this.imagesToDelete.length > 0) {
+      this.offerService.deleteOfferImages(offerId, this.imagesToDelete).subscribe({
+        next: () => {
+          if (this.selectedImages.length > 0) {
+            this.uploadImages(offerId);
+          } else {
+            this.isLoading = false;
+            this.router.navigate(['/my-offers']);
+          }
+        },
+        error: (error) => {
+          console.error('Błąd podczas usuwania obrazów', error);
+          this.errorMessage = 'Wystąpił błąd podczas usuwania obrazów.';
+          this.isLoading = false;
+        }
+      });
+    } else if (this.selectedImages.length > 0) {
+      this.uploadImages(offerId);
+    } else {
+      this.isLoading = false;
+      this.router.navigate(['/my-offers']);
+    }
+  }
+
+  removeExistingImage(imageId: string): void {
+    this.existingImages = this.existingImages.filter(img => img.id !== imageId);
+    this.imagesToDelete.push(imageId);
+  }
+
+  getImageUrl(path: string): string {
+    return `${environment.imagesUrl}/${path}`;
   }
 
   cancel(): void {

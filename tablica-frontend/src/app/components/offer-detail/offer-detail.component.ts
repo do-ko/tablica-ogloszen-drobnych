@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { Offer, OfferStatus } from '../../models/offer.model';
 import { HeaderComponent } from '../header/header.component';
 import { User } from '../../models/user.model';
+import {environment} from '../../enviroment';
 
 @Component({
   selector: 'app-offer-detail',
@@ -25,6 +26,7 @@ export class OfferDetailComponent implements OnInit {
   currentUser: User | null = null;
   isOwner = false;
   currentImageIndex = 0;
+  imageUrls: string[] = [];
 
   constructor(
     private offerService: OfferService,
@@ -51,6 +53,7 @@ export class OfferDetailComponent implements OnInit {
       next: (offer) => {
         this.offer = offer;
         this.isOwner = this.currentUser?.userId === offer.sellerId;
+        this.preloadImages(offer);
         this.isLoading = false;
       },
       error: (error) => {
@@ -59,6 +62,17 @@ export class OfferDetailComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  preloadImages(offer: Offer): void {
+    this.imageUrls = [];
+
+    if (offer.images && offer.images.length > 0) {
+      offer.images.forEach(image => {
+        const fullUrl = `${environment.imagesUrl}/${image.path}`;
+        this.imageUrls.push(fullUrl);
+      });
+    }
   }
 
   nextImage(): void {
@@ -110,5 +124,12 @@ export class OfferDetailComponent implements OnInit {
 
   hasAnyContactInfo(): boolean {
     return this.hasContactEmail() || this.hasContactPhone();
+  }
+
+  getImageUrl(index: number): string {
+    if (index >= 0 && index < this.imageUrls.length) {
+      return this.imageUrls[index];
+    }
+    return '';
   }
 }

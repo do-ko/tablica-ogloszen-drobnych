@@ -85,4 +85,14 @@ export class OfferService {
       })
     );
   }
+
+  addImagesToOffer(offerId: string, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${offerId}/images`, formData);
+  }
+
+  deleteOfferImages(offerId: string, imageIds: string[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${offerId}/images`, {
+      body: imageIds
+    });
+  }
 }
