@@ -205,26 +205,22 @@ export class CreateEditOfferComponent implements OnInit {
   handleFiles(files: FileList): void {
     this.imageUploadError = '';
 
-    // Sprawdź czy nie przekroczono limitu plików
     if (this.selectedImages.length + files.length > this.maxFiles) {
-      this.imageUploadError = `Możesz dodać maksymalnie ${this.maxFiles} obrazów.`;
+      this.imageUploadError = `Only ${this.maxFiles} images could be attached to offer.`;
       return;
     }
 
     Array.from(files).forEach(file => {
-      // Sprawdź typ pliku
       if (!this.allowedTypes.includes(file.type)) {
-        this.imageUploadError = 'Dozwolone są tylko obrazy w formatach: JPG, PNG, WebP i GIF.';
+        this.imageUploadError = 'Only JPEG, PNG, WEBP and GIF files are allowed.';
         return;
       }
 
-      // Sprawdź rozmiar pliku
       if (file.size > this.maxFileSize) {
-        this.imageUploadError = 'Maksymalny rozmiar pliku to 5MB.';
+        this.imageUploadError = 'Max file size is 5MB.';
         return;
       }
 
-      // Utwórz podgląd obrazu
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         this.selectedImages.push({
@@ -235,7 +231,6 @@ export class CreateEditOfferComponent implements OnInit {
       reader.readAsDataURL(file);
     });
 
-    // Zresetuj input po wybraniu plików
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
@@ -271,8 +266,8 @@ export class CreateEditOfferComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Wystąpił błąd podczas aktualizacji oferty.';
-          console.error('Błąd aktualizacji oferty', error);
+          this.errorMessage = 'Error occurred while updating the offer.';
+          console.error('Error occurred while updating the offer.', error);
         }
       });
     } else {
@@ -287,8 +282,8 @@ export class CreateEditOfferComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'Wystąpił błąd podczas tworzenia oferty.';
-          console.error('Błąd tworzenia oferty', error);
+          this.errorMessage = 'Error occurred while creating the offer.';
+          console.error('Error occurred while creating the offer.', error);
         }
       });
     }
@@ -325,8 +320,8 @@ export class CreateEditOfferComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Błąd podczas usuwania obrazów', error);
-          this.errorMessage = 'Wystąpił błąd podczas usuwania obrazów.';
+          console.error('Error occurred while deleting images.', error);
+          this.errorMessage = 'Error occurred while deleting images.';
           this.isLoading = false;
         }
       });
