@@ -6,6 +6,7 @@ import com.webdevlab.tablicabackend.entity.offer.OfferTag;
 import com.webdevlab.tablicabackend.entity.user.ContactData;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,8 @@ public class OfferDTO {
     private ContactData contactData;
     private Set<String> tags;
     private List<OfferImageDTO> images;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public OfferDTO(Offer offer) {
         this.offerId = offer.getId();
@@ -35,5 +38,7 @@ public class OfferDTO {
                 offer.getImages().stream()
                         .map(OfferImageDTO::new)
                         .collect(Collectors.toList());
+        this.createdAt = offer.getCreatedAt();
+        this.updatedAt = offer.getLastModifiedDate();
     }
 }
