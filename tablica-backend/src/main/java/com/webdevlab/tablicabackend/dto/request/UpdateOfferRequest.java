@@ -1,6 +1,7 @@
 package com.webdevlab.tablicabackend.dto.request;
 
 import com.webdevlab.tablicabackend.constants.ValidationConstants;
+import com.webdevlab.tablicabackend.domain.enums.OfferStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -35,6 +36,10 @@ public class UpdateOfferRequest {
             example = "[\"Clothing\", \"Gaming\"]",
             nullable = true)
     private Set<String> tags;
+
+    @Schema(description = "The current status of the offer. Indicates whether the offer is active, archived, etc.",
+            example = "WORK_IN_PROGRESS")
+    private OfferStatus status;
 
     @Schema(description = "Optional custom email to associate with the offer if not using saved contact information. " +
             "Ignored if 'discloseSavedContactInformation' is true.",

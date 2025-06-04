@@ -102,6 +102,7 @@ public class OfferService {
         offer.setTitle(request.getTitle());
         offer.setDescription(request.getDescription());
         offer.setContactData(new ContactData(request.getEmail(), request.getPhone()));
+        offer.setStatus(request.getStatus());
 
         return new OfferDTO(offerRepository.save(offer));
     }

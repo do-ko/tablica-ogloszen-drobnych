@@ -1,0 +1,67 @@
+<div class="message-box-container" [class.open]="isOpen">
+  <div class="message-box-header">
+    <h5 class="mb-0">
+      <ng-container *ngIf="!currentThread">Messages</ng-container>
+      <ng-container *ngIf="currentThread">
+        <button class="btn btn-sm btn-link text-white p-0 me-2" (click)="backToThreads()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        {{ currentThread.subject }}
+      </ng-container>
+    </h5>
+    <button class="btn-close btn-close-white" (click)="toggleMessageBox()"></button>
+  </div>
+
+  <div class="message-box-body" #scrollMe [scrollTop]="isLoading || !currentThread ? 0 : scrollMe.scrollHeight">
+    <div *ngIf="isLoading" class="d-flex justify-content-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && !currentThread" class="threads-list">
+      <div *ngIf="threads.length === 0" class="text-center py-4">
+        <i class="bi bi-chat-dots text-muted fs-3"></i>
+        <p class="mt-3 text-muted">No messages yet. Search offers and contact sellers to start chat!</p>
+      </div>
+
+      <div *ngFor="let thread of threads" class="thread-item" (click)="openThread(thread.id)">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-1 text-truncate">{{ thread.subject }}</h6>
+          <small class="text-muted">{{ thread.lastMessage.createdAt | date:'shortTime' }}</small>
+        </div>
+        <p class="mb-1 text-truncate">{{ thread.lastMessage.content }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && currentThread" class="messages-container">
+      <div *ngIf="currentThread.messages.length === 0" class="text-center py-4">
+        <p class="text-muted">Write a message to start chat.</p>
+      </div>
+
+      <div *ngFor="let message of currentThread.messages"
+           class="message-bubble"
+           [class.outgoing]="message.sender === currentUser?.userId"
+           [class.incoming]="message.sender !== currentUser?.userId">
+        <div class="message-content">{{ message.content }}</div>
+        <small class="message-time">{{ message.createdAt | date:'shortTime' }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="currentThread" class="message-box-footer">
+    <div class="input-group">
+      <input type="text" class="form-control"
+             placeholder="Write message..."
+             [(ngModel)]="newMessage"
+             (keyup.enter)="sendMessage()">
+      <button class="btn btn-primary" (click)="sendMessage()">
+        <i class="bi bi-send"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="message-box-toggle" *ngIf="!isOpen" (click)="toggleMessageBox()">
+  <i class="bi bi-chat-dots"></i>
+</div>

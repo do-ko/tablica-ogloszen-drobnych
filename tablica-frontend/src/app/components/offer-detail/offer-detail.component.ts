@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OfferService } from '../../services/offer.service';
@@ -7,6 +7,7 @@ import { Offer, OfferStatus } from '../../models/offer.model';
 import { HeaderComponent } from '../header/header.component';
 import { User } from '../../models/user.model';
 import {environment} from '../../enviroment';
+import {MessageBoxService} from '../../services/message-box.service';
 
 @Component({
   selector: 'app-offer-detail',
@@ -32,8 +33,9 @@ export class OfferDetailComponent implements OnInit {
     private offerService: OfferService,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private router: Router
-  ) {
+    private router: Router,
+    private messageBoxService: MessageBoxService
+) {
     this.currentUser = this.authService.getCurrentUser();
   }
 
@@ -131,5 +133,15 @@ export class OfferDetailComponent implements OnInit {
       return this.imageUrls[index];
     }
     return '';
+  }
+
+  contactSeller(): void {
+    if (this.offer && this.currentUser) {
+      this.messageBoxService.triggerNewThread(
+        this.offer.sellerId,
+        `Regarding: ${this.offer.title}`,
+        this.offer.offerId
+      );
+    }
   }
 }

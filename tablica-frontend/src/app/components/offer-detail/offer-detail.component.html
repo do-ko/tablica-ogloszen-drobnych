@@ -18,7 +18,7 @@
           <i class="bi bi-arrow-left"></i> Back to offers
         </a>
       </div>
-      <div *ngIf="isOwner" class="action-buttons">
+      <div *ngIf="isOwner && offer.status !== 'ARCHIVE'" class="action-buttons">
         <button class="btn btn-outline-primary me-2" (click)="editOffer()">
           <i class="bi bi-pencil"></i> Edit
         </button>
@@ -98,6 +98,12 @@
               <div class="text-muted" *ngIf="!hasAnyContactInfo()">
                 <p>Seller didn't provide contact information.</p>
               </div>
+
+              <button *ngIf="!isOwner && offer.status === 'PUBLISHED' && currentUser"
+                      class="btn btn-primary mt-3 w-100"
+                      (click)="contactSeller()">
+                <i class="bi bi-chat-dots me-2"></i> Message the seller
+              </button>
             </div>
           </div>
         </div>

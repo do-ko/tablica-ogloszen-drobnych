@@ -1,83 +1,129 @@
 package com.webdevlab.tablicabackend.service;
 
 import com.webdevlab.tablicabackend.dto.MessageDTO;
-import com.webdevlab.tablicabackend.dto.request.SendMessageRequest;
+import com.webdevlab.tablicabackend.dto.MessageThreadDTO;
+import com.webdevlab.tablicabackend.dto.request.CreateMessageThreadRequest;
 import com.webdevlab.tablicabackend.entity.message.Message;
-import com.webdevlab.tablicabackend.entity.user.User;
-import com.webdevlab.tablicabackend.exception.message.MessageNotFoundException;
-import com.webdevlab.tablicabackend.exception.message.SelfMessagingNotAllowedException;
-import com.webdevlab.tablicabackend.exception.message.UnauthorizedMessageAccessException;
-import com.webdevlab.tablicabackend.exception.user.UserNotFoundException;
+import com.webdevlab.tablicabackend.entity.message.MessageThread;
 import com.webdevlab.tablicabackend.repository.MessageRepository;
-import com.webdevlab.tablicabackend.repository.UserRepository;
+import com.webdevlab.tablicabackend.repository.MessageThreadRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
 
-    public MessageDTO sendMessage(User sender, SendMessageRequest request) {
-        User receiver = userRepository.findById(request.getReceiverId())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-        if (sender.getId().equals(request.getReceiverId())) {
-            throw new SelfMessagingNotAllowedException("Cannot send a message to yourself.");
+    private final MessageRepository messageRepository;
+    private final MessageThreadRepository threadRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public List<MessageThreadDTO> getUserThreads(String userId) {
+        return threadRepository.findThreadsByUserId(userId).stream()
+                .map(MessageThreadDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public MessageThreadDTO getThreadById(String threadId, String userId) {
+        MessageThread thread = threadRepository.findById(threadId)
+                .orElseThrow(() -> new RuntimeException("Thread not found"));
+
+        if (!thread.getParticipants().contains(userId)) {
+            throw new RuntimeException("Access denied");
         }
+
+        return MessageThreadDTO.fromEntity(thread);
+    }
+
+    @Transactional
+    public MessageThreadDTO createThread(CreateMessageThreadRequest request, String senderId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<String> participants = new ArrayList<>();
+        participants.add(senderId);
+        participants.add(request.getReceiverId());
+
+        MessageThread thread = MessageThread.builder()
+                .subject(request.getSubject())
+                .participants(participants)
+                .createdAt(now)
+                .updatedAt(now)
+                .offerId(request.getOfferId())
+                .messages(new ArrayList<>())
+                .build();
+
+        threadRepository.save(thread);
 
         Message message = Message.builder()
-                .sender(sender)
-                .receiver(receiver)
-                .subject(request.getSubject())
+                .sender(senderId)
                 .content(request.getContent())
-                .read(false)
-                .sentAt(Instant.now())
+                .isRead(false)
+                .createdAt(now)
+                .thread(thread)
                 .build();
 
-        Message saved = messageRepository.save(message);
-        return new MessageDTO(saved);
+        messageRepository.save(message);
+
+        thread.setLastMessage(message);
+        thread.getMessages().add(message);
+        threadRepository.save(thread);
+
+        notifyThreadUpdate(request.getReceiverId(), "all");
+        notifyThreadUpdate(senderId, "all");
+
+        return MessageThreadDTO.fromEntity(thread);
     }
 
-    public Page<MessageDTO> getInbox(User receiver, Pageable pageable) {
-        return messageRepository.findByReceiverOrderBySentAtDesc(receiver, pageable)
-                .map(MessageDTO::new);
-    }
+    @Transactional
+    public MessageDTO sendMessage(String content, String threadId, String senderId) {
+        MessageThread thread = threadRepository.findById(threadId)
+                .orElseThrow(() -> new RuntimeException("Thread not found"));
 
-    public Page<MessageDTO> getSent(User sender, Pageable pageable) {
-        return messageRepository.findBySenderOrderBySentAtDesc(sender, pageable)
-                .map(MessageDTO::new);
-    }
-
-    public MessageDTO readMessage(String messageId, User user) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new MessageNotFoundException("Message not found"));
-        if (!message.getReceiver().getId().equals(user.getId())) {
-            throw new UnauthorizedMessageAccessException("You are not authorized to read this message");
+        if (!thread.getParticipants().contains(senderId)) {
+            throw new RuntimeException("Access denied");
         }
 
-        if (!message.getRead()) {
-            message.setRead(true);
-            messageRepository.save(message);
-        }
+        LocalDateTime now = LocalDateTime.now();
 
-        return new MessageDTO(message);
-    }
-
-    public MessageDTO replyToMessage(User sender, String originalMessageId, String content) {
-        Message original = messageRepository.findById(originalMessageId)
-                .orElseThrow(() -> new MessageNotFoundException("Message not found"));
-
-        SendMessageRequest replyRequest = SendMessageRequest.builder()
-                .receiverId(original.getSender().getId())
-                .subject("Re: " + original.getSubject())
+        Message message = Message.builder()
+                .sender(senderId)
                 .content(content)
+                .isRead(false)
+                .createdAt(now)
+                .thread(thread)
                 .build();
 
-        return sendMessage(sender, replyRequest);
+        messageRepository.save(message);
+
+        thread.setLastMessage(message);
+        thread.getMessages().add(message);
+        thread.setUpdatedAt(now);
+        threadRepository.save(thread);
+
+        for (String participantId : thread.getParticipants()) {
+            if (!participantId.equals(senderId)) {
+                notifyThreadUpdate(participantId, threadId);
+                notifyThreadUpdate(participantId, "all");
+            }
+        }
+
+        notifyThreadUpdate(senderId, threadId);
+
+        return MessageDTO.fromEntity(message);
+    }
+
+    private void notifyThreadUpdate(String userId, String threadId) {
+        messagingTemplate.convertAndSendToUser(
+                userId,
+                "/queue/thread-updates",
+                threadId
+        );
     }
 }

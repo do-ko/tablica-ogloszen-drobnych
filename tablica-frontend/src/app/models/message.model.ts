@@ -1,20 +1,19 @@
-export interface MessageThread {
+export interface Message {
   id: string;
-  participants: string[];
-  offerId?: string;
-  subject: string;
-  lastMessage: Message;
-  messages: Message[];
+  sender: string;
+  content: string;
+  createdAt: Date;
+  threadId: string;
+  isRead: boolean;
 }
 
-export interface Message {
-  messageId: string;
-  fromUserId: string;
-  toUserId: string;
+export interface MessageThread {
+  id: string;
   subject: string;
-  content: string;
-  offerId?: string;
+  participants: string[];
+  messages: Message[];
+  lastMessage: Message;
   createdAt: Date;
-  isRead: boolean;
-  parentMessageId?: string;
+  updatedAt: Date;
+  offerId?: string;
 }
