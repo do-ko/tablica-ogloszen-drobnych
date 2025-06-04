@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -41,9 +42,13 @@ public class OfferImageServiceTest {
     private Offer offer;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         seller = User.builder().id("user-1").build();
         offer = Offer.builder().id("offer-1").seller(seller).images(new ArrayList<>()).build();
+
+        Field uploadDirField = OfferImageService.class.getDeclaredField("uploadDirRoot");
+        uploadDirField.setAccessible(true);
+        uploadDirField.set(offerImageService, "src/test/resources/uploads");
     }
 
     @Test

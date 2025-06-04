@@ -42,15 +42,13 @@ public class CreateOfferRequest {
             nullable = true)
     private Set<String> tags;
 
-    @Schema(description = "Optional custom email to associate with the offer if not using saved contact information. " +
-            "Ignored if 'discloseSavedContactInformation' is true.",
+    @Schema(description = "Optional custom email to associate with the offer if not using saved contact information.",
             example = "custom.email@example.com",
             nullable = true)
     @Email(message = "Email must be in a correct format.")
     private String email;
 
-    @Schema(description = "Optional custom phone number to associate with the offer if not using saved contact information. " +
-            "Ignored if 'discloseSavedContactInformation' is true.",
+    @Schema(description = "Optional custom phone number to associate with the offer if not using saved contact information.",
             example = "+48123456789",
             nullable = true)
     @Pattern(regexp = "^$|^\\+?[1-9]\\d{1,14}$",
