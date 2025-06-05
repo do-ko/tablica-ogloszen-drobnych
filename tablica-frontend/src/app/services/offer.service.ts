@@ -13,10 +13,21 @@ export class OfferService {
 
   constructor(private http: HttpClient) {}
 
-  getPublishedOffers(): Observable<Offer[]> {
-    return this.http.get<any>(`${this.apiUrl}`).pipe(
-      map(response => response.content)
-    );
+  getPublishedOffers(page = 0, size = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?page=${page}&size=${size}`);
+  }
+
+  searchOffers(keyword: string, tags: string[], page = 0, size = 10): Observable<any> {
+    let params = new HttpParams()
+      .set('keyword', keyword)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    tags.forEach(tag => {
+      params = params.append('tags', tag);
+    });
+
+    return this.http.get<any>(this.apiUrl, { params });
   }
 
   getUserOffers(userId: string): Observable<Offer[]> {
@@ -58,22 +69,6 @@ export class OfferService {
   changeOfferStatus(id: string, status: OfferStatus): Observable<Offer> {
     const params = new HttpParams().set('status', status.toString());
     return this.http.put<Offer>(`${this.apiUrl}/${id}/status`, null, { params });
-  }
-
-  searchOffers(query: string, tags: string[]): Observable<Offer[]> {
-    let params = new HttpParams().set('keyword', query || '');
-
-    return this.http.get<any>(`${this.apiUrl}`, { params }).pipe(
-      map(response => {
-        let offers = response.content;
-        if (tags.length > 0) {
-          offers = offers.filter((offer: Offer) =>
-            tags.some(tag => offer.tags.includes(tag))
-          );
-        }
-        return offers;
-      })
-    );
   }
 
   getTagSuggestions(input: string): Observable<string[]> {

@@ -33,6 +33,11 @@ export class OfferListComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
+  pageNumber = 0;
+  pageSize = 12;
+  totalElements = 0;
+  totalPages = 0;
+
   constructor(
     private offerService: OfferService,
     private authService: AuthService,
@@ -81,12 +86,14 @@ export class OfferListComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    this.offerService.getPublishedOffers()
+    this.offerService.getPublishedOffers(this.pageNumber, this.pageSize)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe(
-        offers => {
-          this.offers = offers;
-          this.filteredOffers = offers;
+        response => {
+          this.offers = response.content;
+          this.filteredOffers = response.content;
+          this.totalElements = response.totalElements;
+          this.totalPages = response.totalPages;
         },
         error => {
           console.error('Error loading offers', error);
@@ -99,17 +106,28 @@ export class OfferListComponent implements OnInit {
     const query = this.searchForm.get('searchQuery')?.value || '';
     this.isLoading = true;
 
-    this.offerService.searchOffers(query, this.selectedTags)
+    this.offerService.searchOffers(query, this.selectedTags, this.pageNumber, this.pageSize)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe(
-        offers => {
-          this.filteredOffers = offers;
+        response => {
+          this.filteredOffers = response.content;
+          this.totalElements = response.totalElements;
+          this.totalPages = response.totalPages;
         },
         error => {
           console.error('Error searching offers', error);
           this.error = 'Error occured while searching offers. Please try again later.';
         }
       );
+  }
+
+  changePage(page: number): void {
+    this.pageNumber = page;
+    if (this.searchForm.get('searchQuery')?.value || this.selectedTags.length > 0) {
+      this.filterOffers();
+    } else {
+      this.loadOffers();
+    }
   }
 
   addTag(tag: string): void {

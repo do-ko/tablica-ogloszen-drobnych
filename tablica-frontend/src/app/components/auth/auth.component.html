@@ -28,7 +28,7 @@
               <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
               <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <button class="btn btn-primary" type="submit" [disabled]="loginForm.invalid || isLoading">
-                {{ isLoading ? 'Loading...' : 'Submit' }}
+                {{ isLoading ? 'Loading...' : 'Login' }}
               </button>
             </form>
           </div>
