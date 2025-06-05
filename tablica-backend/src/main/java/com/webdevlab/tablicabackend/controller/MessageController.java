@@ -6,6 +6,7 @@ import com.webdevlab.tablicabackend.dto.request.CreateMessageRequest;
 import com.webdevlab.tablicabackend.dto.request.CreateMessageThreadRequest;
 import com.webdevlab.tablicabackend.entity.user.User;
 import com.webdevlab.tablicabackend.service.MessageService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
+@Tag(name = "Message")
 public class MessageController {
 
     private final MessageService messageService;
