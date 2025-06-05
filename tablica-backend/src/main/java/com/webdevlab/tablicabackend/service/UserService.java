@@ -105,4 +105,10 @@ public class UserService {
         user.setContactData(contactData);
         return new UserDTO(userRepository.save(user));
     }
+
+    public String getUserNameById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return user.getUsername();
+    }
 }

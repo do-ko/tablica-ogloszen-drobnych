@@ -5,10 +5,7 @@ import com.webdevlab.tablicabackend.domain.enums.Role;
 import com.webdevlab.tablicabackend.dto.UserDTO;
 import com.webdevlab.tablicabackend.dto.request.ChangeContactDataRequest;
 import com.webdevlab.tablicabackend.dto.request.ChangePasswordRequest;
-import com.webdevlab.tablicabackend.dto.response.ChangeContactDataResponse;
-import com.webdevlab.tablicabackend.dto.response.ChangePasswordResponse;
-import com.webdevlab.tablicabackend.dto.response.DeactivateAccountResponse;
-import com.webdevlab.tablicabackend.dto.response.RoleAddResponse;
+import com.webdevlab.tablicabackend.dto.response.*;
 import com.webdevlab.tablicabackend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -88,4 +85,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
+    @Operation(summary = "Get user name by ID",
+            description = "Retrieves the username of a user based on their ID. " +
+                    "This endpoint is accessible to all authenticated users. " +
+                    "Returns the username if the user with the specified ID exists.")
+    @GetMapping("/{userId}/username")
+    public ResponseEntity<GetUsernameResponse> getUserNameById(@PathVariable String userId) {
+        String userName = userService.getUserNameById(userId);
+        GetUsernameResponse response = GetUsernameResponse.builder()
+                .username(userName)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

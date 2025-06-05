@@ -13,6 +13,10 @@ interface ChangeContactDataResponse {
   user: User;
 }
 
+interface GetUsernameResponse {
+  username: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,5 +27,9 @@ export class UserService {
 
   changeContactData(userId: string, data: ChangeContactDataRequest): Observable<ChangeContactDataResponse> {
     return this.http.put<ChangeContactDataResponse>(`${this.apiUrl}/${userId}/contactData`, data);
+  }
+
+  getUserNameById(userId: string): Observable<GetUsernameResponse> {
+    return this.http.get<GetUsernameResponse>(`${this.apiUrl}/${userId}/username`);
   }
 }

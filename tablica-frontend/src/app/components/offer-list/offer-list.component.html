@@ -73,10 +73,10 @@
           </div>
           <div class="card-body">
             <p class="card-text">{{ offer.description | slice:0:150 }}{{ offer.description.length > 150 ? '...' : '' }}</p>
+            <span *ngFor="let tag of offer.tags" class="badge bg-secondary me-1">{{ tag }}</span>
           </div>
           <div class="card-footer d-flex justify-content-start align-items-center bg-white">
             <small class="text-muted">{{ offer.createdAt | date:'dd.MM.yyyy' }}</small>
-            <span *ngFor="let tag of offer.tags" class="badge bg-secondary me-1">{{ tag }}</span>
           </div>
         </div>
       </a>

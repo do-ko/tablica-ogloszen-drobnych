@@ -12,7 +12,7 @@
     <button class="btn-close btn-close-white" (click)="toggleMessageBox()"></button>
   </div>
 
-  <div class="message-box-body" #scrollMe [scrollTop]="isLoading || !currentThread ? 0 : scrollMe.scrollHeight">
+  <div class="message-box-body" #scrollMe>
     <div *ngIf="isLoading" class="d-flex justify-content-center py-4">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -28,9 +28,9 @@
       <div *ngFor="let thread of threads" class="thread-item" (click)="openThread(thread.id)">
         <div class="d-flex justify-content-between align-items-center">
           <h6 class="mb-1 text-truncate">{{ thread.subject }}</h6>
-          <small class="text-muted">{{ thread.lastMessage.createdAt | date:'shortTime' }}</small>
+          <small class="text-muted">{{ thread.lastMessage.createdAt | date:'dd.MM.yy' }}</small>
         </div>
-        <p class="mb-1 text-truncate">{{ thread.lastMessage.content }}</p>
+        <p class="mb-1 text-muted">{{ thread.lastMessage.content }}</p>
       </div>
     </div>
 

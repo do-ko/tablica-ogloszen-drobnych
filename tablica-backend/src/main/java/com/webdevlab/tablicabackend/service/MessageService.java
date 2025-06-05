@@ -114,8 +114,6 @@ public class MessageService {
             }
         }
 
-        notifyThreadUpdate(senderId, threadId);
-
         return MessageDTO.fromEntity(message);
     }
 

@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import {CommonModule, Location} from '@angular/common';
 import { OfferService } from '../../services/offer.service';
 import { AuthService } from '../../services/auth.service';
 import { Offer, OfferStatus } from '../../models/offer.model';
@@ -8,6 +8,7 @@ import { HeaderComponent } from '../header/header.component';
 import { User } from '../../models/user.model';
 import {environment} from '../../enviroment';
 import {MessageBoxService} from '../../services/message-box.service';
+import {UserService} from '../../services/user.service';
 
 @Component({
   selector: 'app-offer-detail',
@@ -16,8 +17,7 @@ import {MessageBoxService} from '../../services/message-box.service';
   standalone: true,
   imports: [
     CommonModule,
-    HeaderComponent,
-    RouterLink
+    HeaderComponent
   ]
 })
 export class OfferDetailComponent implements OnInit {
@@ -28,13 +28,16 @@ export class OfferDetailComponent implements OnInit {
   isOwner = false;
   currentImageIndex = 0;
   imageUrls: string[] = [];
+  sellerUserName: string | null = null;
 
   constructor(
     private offerService: OfferService,
     private authService: AuthService,
+    private userService: UserService,
     private route: ActivatedRoute,
     private router: Router,
-    private messageBoxService: MessageBoxService
+    private messageBoxService: MessageBoxService,
+    private location: Location
 ) {
     this.currentUser = this.authService.getCurrentUser();
   }
@@ -57,6 +60,15 @@ export class OfferDetailComponent implements OnInit {
         this.isOwner = this.currentUser?.userId === offer.sellerId;
         this.preloadImages(offer);
         this.isLoading = false;
+        this.userService.getUserNameById(offer.sellerId).subscribe({
+          next: (response) => {
+            this.sellerUserName = response.username;
+          },
+          error: (error) => {
+            console.error('Error fetching seller username', error);
+            this.sellerUserName = "Unknown Seller";
+          }
+        });
       },
       error: (error) => {
         console.error('Error loading offer', error);
@@ -126,6 +138,14 @@ export class OfferDetailComponent implements OnInit {
 
   hasAnyContactInfo(): boolean {
     return this.hasContactEmail() || this.hasContactPhone();
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/offers']);
+    }
   }
 
   getImageUrl(index: number): string {
