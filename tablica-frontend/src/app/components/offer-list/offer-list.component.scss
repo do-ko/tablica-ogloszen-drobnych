@@ -22,6 +22,19 @@
   }
 }
 
+.card-body {
+  display: flex;
+  flex-direction: column;
+
+  .card-text {
+    flex-grow: 1;
+  }
+
+  .tags-container {
+    margin-top: auto;
+  }
+}
+
 .selected-tags {
   .badge {
     display: inline-flex;

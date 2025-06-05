@@ -106,14 +106,17 @@ export class OfferListComponent implements OnInit {
     const query = this.searchForm.get('searchQuery')?.value || '';
     this.isLoading = true;
 
-    this.offerService.searchOffers(query, this.selectedTags, this.pageNumber, this.pageSize)
+    this.offerService.searchOffers(query, this.selectedTags)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe(
-        response => {
-          this.filteredOffers = response.content;
-          this.totalElements = response.totalElements;
-          this.totalPages = response.totalPages;
+        offers => {
+          this.filteredOffers = offers
         },
+        // response => {
+        //   this.filteredOffers = response.content;
+        //   this.totalElements = response.totalElements;
+        //   this.totalPages = response.totalPages;
+        // },
         error => {
           console.error('Error searching offers', error);
           this.error = 'Error occured while searching offers. Please try again later.';

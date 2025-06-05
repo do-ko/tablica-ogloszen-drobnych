@@ -72,8 +72,10 @@
             <h5 class="card-title mb-0 text-truncate">{{ offer.title }}</h5>
           </div>
           <div class="card-body">
-            <p class="card-text">{{ offer.description | slice:0:150 }}{{ offer.description.length > 150 ? '...' : '' }}</p>
-            <span *ngFor="let tag of offer.tags" class="badge bg-secondary me-1">{{ tag }}</span>
+            <p class="card-text flex-grow-1">{{ offer.description | slice:0:150 }}{{ offer.description.length > 150 ? '...' : '' }}</p>
+            <div class="tags-container mt-auto">
+              <span *ngFor="let tag of offer.tags" class="badge bg-secondary me-1">{{ tag }}</span>
+            </div>
           </div>
           <div class="card-footer d-flex justify-content-start align-items-center bg-white">
             <small class="text-muted">{{ offer.createdAt | date:'dd.MM.yyyy' }}</small>
