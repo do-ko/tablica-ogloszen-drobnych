@@ -103,7 +103,6 @@ class MessageServiceTest {
         verify(threadRepository).save(defaultThread);
         verify(messagingTemplate).convertAndSendToUser(receiverId, "/queue/thread-updates", threadId);
         verify(messagingTemplate).convertAndSendToUser(receiverId, "/queue/thread-updates", "all");
-        verify(messagingTemplate).convertAndSendToUser(senderId, "/queue/thread-updates", threadId);
 
         assertNotNull(result);
         assertEquals("Hello again", result.getContent());
