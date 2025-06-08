@@ -1,5 +1,7 @@
 package com.webdevlab.tablicabackend.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,5 +22,10 @@ public class GlobalValidationExceptionHandler {
         );
 
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("JWT token has expired");
     }
 }
