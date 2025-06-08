@@ -47,6 +47,7 @@ public class OfferImageService {
         return filePath;
     }
 
+    @Transactional
     public List<OfferImageDTO> uploadOfferImages(List<MultipartFile> files, String offerId, User user) {
         Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException("Offer not found"));
         if (!offer.getSeller().getId().equals(user.getId()))
