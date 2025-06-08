@@ -89,7 +89,6 @@ public class UserService {
         return new RoleAddResult(token, new UserDTO(user));
     }
 
-    // TODO - write tests (do later as more classes will be affected by this method soon)
     public void deactivateAccount(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
         user.setEnabled(false);
