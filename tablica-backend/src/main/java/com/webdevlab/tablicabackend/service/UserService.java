@@ -18,6 +18,7 @@ import com.webdevlab.tablicabackend.dto.request.LoginRequest;
 import com.webdevlab.tablicabackend.dto.request.RegisterRequest;
 import com.webdevlab.tablicabackend.repository.OfferRepository;
 import com.webdevlab.tablicabackend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -89,7 +90,7 @@ public class UserService {
         return new RoleAddResult(token, new UserDTO(user));
     }
 
-    // TODO - write tests (do later as more classes will be affected by this method soon)
+    @Transactional
     public void deactivateAccount(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
         user.setEnabled(false);
