@@ -19,4 +19,7 @@ public final class ValidationConstants {
     //     Files
     public static final int OFFER_MAX_FILES = 5;
     public static final long OFFER_MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024L;
+
+    //      MESSAGES
+    public static final int MESSAGE_MAX_LENGTH = 2000;
 }

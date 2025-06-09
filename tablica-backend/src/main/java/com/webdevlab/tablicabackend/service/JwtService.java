@@ -1,6 +1,7 @@
 package com.webdevlab.tablicabackend.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -57,8 +58,12 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername());
+        try {
+            final String username = extractUsername(token);
+            return username.equals(userDetails.getUsername());
+        } catch (ExpiredJwtException e) {
+            return false;
+        }
     }
 
     private Claims extractAllClaims(String token) {

@@ -5,6 +5,8 @@ import com.webdevlab.tablicabackend.dto.MessageThreadDTO;
 import com.webdevlab.tablicabackend.dto.request.CreateMessageThreadRequest;
 import com.webdevlab.tablicabackend.entity.message.Message;
 import com.webdevlab.tablicabackend.entity.message.MessageThread;
+import com.webdevlab.tablicabackend.exception.message.MessageAccessDeniedException;
+import com.webdevlab.tablicabackend.exception.message.ThreadNotFoundException;
 import com.webdevlab.tablicabackend.repository.MessageRepository;
 import com.webdevlab.tablicabackend.repository.MessageThreadRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,10 +35,10 @@ public class MessageService {
 
     public MessageThreadDTO getThreadById(String threadId, String userId) {
         MessageThread thread = threadRepository.findById(threadId)
-                .orElseThrow(() -> new RuntimeException("Thread not found"));
+                .orElseThrow(() -> new ThreadNotFoundException("Thread not found: " + threadId));
 
         if (!thread.getParticipants().contains(userId)) {
-            throw new RuntimeException("Access denied");
+            throw new MessageAccessDeniedException("Access denied");
         }
 
         return MessageThreadDTO.fromEntity(thread);
@@ -44,7 +46,6 @@ public class MessageService {
 
     @Transactional
     public MessageThreadDTO createThread(CreateMessageThreadRequest request, String senderId) {
-        LocalDateTime now = LocalDateTime.now();
 
         List<String> participants = new ArrayList<>();
         participants.add(senderId);
@@ -53,8 +54,6 @@ public class MessageService {
         MessageThread thread = MessageThread.builder()
                 .subject(request.getSubject())
                 .participants(participants)
-                .createdAt(now)
-                .updatedAt(now)
                 .offerId(request.getOfferId())
                 .messages(new ArrayList<>())
                 .build();
@@ -65,7 +64,6 @@ public class MessageService {
                 .sender(senderId)
                 .content(request.getContent())
                 .isRead(false)
-                .createdAt(now)
                 .thread(thread)
                 .build();
 
@@ -84,19 +82,16 @@ public class MessageService {
     @Transactional
     public MessageDTO sendMessage(String content, String threadId, String senderId) {
         MessageThread thread = threadRepository.findById(threadId)
-                .orElseThrow(() -> new RuntimeException("Thread not found"));
+                .orElseThrow(() -> new ThreadNotFoundException("Thread not found: " + threadId));
 
         if (!thread.getParticipants().contains(senderId)) {
-            throw new RuntimeException("Access denied");
+            throw new MessageAccessDeniedException("Access denied");
         }
-
-        LocalDateTime now = LocalDateTime.now();
 
         Message message = Message.builder()
                 .sender(senderId)
                 .content(content)
                 .isRead(false)
-                .createdAt(now)
                 .thread(thread)
                 .build();
 
@@ -104,7 +99,6 @@ public class MessageService {
 
         thread.setLastMessage(message);
         thread.getMessages().add(message);
-        thread.setUpdatedAt(now);
         threadRepository.save(thread);
 
         for (String participantId : thread.getParticipants()) {

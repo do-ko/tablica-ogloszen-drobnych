@@ -10,18 +10,14 @@ import java.util.Map;
 
 @ControllerAdvice
 public class MessageExceptionHandler {
-    @ExceptionHandler(MessageNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleMessageNotFoundException(MessageNotFoundException ex) {
+
+    @ExceptionHandler(ThreadNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleThreadNotFoundException(ThreadNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
     }
 
-    @ExceptionHandler(UnauthorizedMessageAccessException.class)
-    public ResponseEntity<Map<String, String>> handleUnauthorizedMessageAccessException(UnauthorizedMessageAccessException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
-    }
-
-    @ExceptionHandler(SelfMessagingNotAllowedException.class)
-    public ResponseEntity<Map<String, String>> handleSelfMessagingNotAllowedException(SelfMessagingNotAllowedException ex) {
+    @ExceptionHandler(MessageAccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleMessageAccessDeniedException(MessageAccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", ex.getMessage()));
     }
 }

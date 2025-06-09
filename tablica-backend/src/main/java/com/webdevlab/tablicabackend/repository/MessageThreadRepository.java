@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface MessageThreadRepository extends JpaRepository<MessageThread, String> {
 
-    @Query("SELECT mt FROM MessageThread mt WHERE :userId MEMBER OF mt.participants ORDER BY mt.updatedAt DESC")
+    @Query("SELECT mt FROM MessageThread mt WHERE :userId MEMBER OF mt.participants ORDER BY mt.lastModifiedDate DESC")
     List<MessageThread> findThreadsByUserId(String userId);
 }

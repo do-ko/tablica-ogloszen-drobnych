@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,7 +18,7 @@ public class MessageDTO {
     private String sender;
     private String content;
     private boolean isRead;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private String threadId;
 
     public static MessageDTO fromEntity(Message message) {

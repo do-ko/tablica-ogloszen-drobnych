@@ -1,21 +1,20 @@
 package com.webdevlab.tablicabackend.entity.message;
 
+import com.webdevlab.tablicabackend.entity.Auditable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageThread {
+public class MessageThread extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -27,9 +26,6 @@ public class MessageThread {
 
     @OneToMany(mappedBy = "thread", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     @OneToOne
     private Message lastMessage;

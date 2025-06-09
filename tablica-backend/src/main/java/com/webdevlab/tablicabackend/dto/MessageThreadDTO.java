@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,8 +21,8 @@ public class MessageThreadDTO {
     private List<String> participants;
     private List<MessageDTO> messages;
     private MessageDTO lastMessage;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private String offerId;
 
     public static MessageThreadDTO fromEntity(MessageThread thread) {
@@ -35,7 +36,7 @@ public class MessageThreadDTO {
                 .lastMessage(thread.getLastMessage() != null ?
                         MessageDTO.fromEntity(thread.getLastMessage()) : null)
                 .createdAt(thread.getCreatedAt())
-                .updatedAt(thread.getUpdatedAt())
+                .updatedAt(thread.getLastModifiedDate())
                 .offerId(thread.getOfferId())
                 .build();
     }

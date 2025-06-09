@@ -1,19 +1,18 @@
 package com.webdevlab.tablicabackend.entity.message;
 
+import com.webdevlab.tablicabackend.entity.Auditable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class Message extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -21,7 +20,6 @@ public class Message {
     private String sender;
     private String content;
     private boolean isRead;
-    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thread_id")

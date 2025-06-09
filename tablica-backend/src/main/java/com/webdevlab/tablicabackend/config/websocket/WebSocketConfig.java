@@ -14,9 +14,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-
-    @Autowired
-    private WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
+    private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
 
     @Override

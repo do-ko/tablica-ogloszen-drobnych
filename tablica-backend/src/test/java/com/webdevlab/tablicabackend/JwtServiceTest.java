@@ -26,6 +26,7 @@ public class JwtServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(jwtService, "secretKey", Base64.getEncoder().encodeToString("my-256-bit-secret-should-be-long-enough!".getBytes()));
+        ReflectionTestUtils.setField(jwtService, "expirationTime", 1000 * 60 * 60);
     }
 
     @Test
@@ -76,5 +77,39 @@ public class JwtServiceTest {
 
         // Then
         assertEquals("testuser", subject);
+    }
+
+    @Test
+    void givenInvalidUser_whenIsTokenValid_thenReturnsFalse() {
+        UserDetails userDetails = User.builder()
+                .username("testuser")
+                .password("pass")
+                .roles(Set.of(Role.BUYER))
+                .build();
+
+        String token = jwtService.generateToken(userDetails);
+
+        UserDetails otherUser = User.builder()
+                .username("differentuser")
+                .password("pass")
+                .roles(Set.of(Role.BUYER))
+                .build();
+
+        assertFalse(jwtService.isTokenValid(token, otherUser));
+    }
+
+    @Test
+    void givenExpiredToken_whenIsTokenValid_thenReturnsFalse() {
+        ReflectionTestUtils.setField(jwtService, "expirationTime", -1000); // wygasły token
+
+        UserDetails userDetails = User.builder()
+                .username("testuser")
+                .password("pass")
+                .roles(Set.of(Role.BUYER))
+                .build();
+
+        String token = jwtService.generateToken(userDetails);
+
+        assertFalse(jwtService.isTokenValid(token, userDetails));
     }
 }

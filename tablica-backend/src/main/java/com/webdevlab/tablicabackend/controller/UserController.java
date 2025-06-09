@@ -85,7 +85,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@security.isSelf(#userId, authentication) and @security.isEnabled(authentication)")
+    @PreAuthorize("@security.isEnabled(authentication)")
     @Operation(summary = "Get user name by ID",
             description = "Retrieves the username of a user based on their ID. " +
                     "This endpoint is accessible to all authenticated users. " +
